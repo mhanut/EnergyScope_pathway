@@ -8,15 +8,15 @@
 # SOURCE_2: For missing data (hydro, coal, geothermal, ...) EU reference scenario 2020 - Trends to 2050
 # SOURCE_3: https://economie.fgov.be/fr/publications/energy-key-data-fevrier-2022#:~:text=La%20Direction%20g%C3%A9n%C3%A9rale%20de%20l'Energie%20produit%20et%20publie%2C%20chaque,%C3%A9volution%20au%20fil%20du%20temps.
 
-subject to elec_prod_NUCLEAR_2025: sum {t in PERIODS}   (   F_t ['YEAR_2025','NUCLEAR', t] * t_op[t] ) = 34400; #from SPF_Economie, versus 31700 from ELIA, versus 34883 from EU
-# subject to elec_prod_CCGT_2025: sum {t in PERIODS} (        F_t ['YEAR_2025','CCGT', t] * t_op[t] ) = 26800; #from SPF_Economie, versus 27 800 from ELIA, versus 27602 from EU
-subject to elec_prod_WIND_OFFSHORE_2025: sum {t in PERIODS} ( F_t ['YEAR_2025','WIND_OFFSHORE', t] * t_op[t] ) = 6989; #versus 6700 from ELIA, versus 6826 from EU (SPF_Economie gives 12.8 TWh for all the wind)
-subject to elec_prod_WIND_ONSHORE_2025: sum {t in PERIODS}  ( F_t ['YEAR_2025','WIND_ONSHORE' , t] * t_op[t])  = 5811; #from SPF_Economie, versus 4100 from ELIA, versus 4052 from EU (SPF_Economie gives 12.8 TWh for all the wind)
-subject to elec_prod_PV_2025: sum {t in PERIODS} (F_t ['YEAR_2025','PV', t] * t_op[t] ) = 5100; #from SPF_Economie, versus 4300 from ELIA, versus 4327 from EU
-subject to elec_prod_GEOTHERMAL_2025: sum {t in PERIODS} (F_t ['YEAR_2025','GEOTHERMAL', t] * t_op[t] ) = 0; #from EU
-subject to elec_prod_HYDRO_RIVER_2025: sum {t in PERIODS} (F_t ['YEAR_2025','HYDRO_RIVER', t] * t_op[t] ) = 353; #from EU (confirmed by SPF_Economie, 300)
-subject to elec_prod_COAL_US_2025: sum {t in PERIODS} (     F_t ['YEAR_2025','COAL_US', t] * t_op[t] ) = 1900; #from SPF_Economie
-subject to elec_prod_COAL_IGCC_2025: sum {t in PERIODS} (   F_t ['YEAR_2025','COAL_IGCC', t] * t_op[t] ) = 0; #As done by GL for 2015
+subject to elec_prod_NUCLEAR_2025: sum {t in PERIODS}   (   F_t ['YEAR_2025','NUCLEAR', t] * t_op[t] ) = 34400 ; #For 2025: 32900 #from SPF_Economie versus 31700 from ELIA, versus 34883 from EU
+# subject to elec_prod_CCGT_2025: sum {t in PERIODS} (        F_t ['YEAR_2025','CCGT', t] * t_op[t] ) = 26800; #j'ai pas encore trouvé pour CCGT #from SPF_Economie, versus 27 800 from ELIA, versus 27602 from EU
+subject to elec_prod_WIND_OFFSHORE_2025: sum {t in PERIODS} ( F_t ['YEAR_2025','WIND_OFFSHORE', t] * t_op[t] ) = 6989 ; #For 2025:8000#versus 6700 from ELIA, versus 6826 from EU (SPF_Economie gives 12.8 TWh for all the wind)
+subject to elec_prod_WIND_ONSHORE_2025: sum {t in PERIODS}  ( F_t ['YEAR_2025','WIND_ONSHORE' , t] * t_op[t])  = 5811 ; #For 2025:7600 #from SPF_Economie, versus 4100 from ELIA, versus 4052 from EU (SPF_Economie gives 12.8 TWh for all the wind)
+subject to elec_prod_PV_2025: sum {t in PERIODS} (F_t ['YEAR_2025','PV', t] * t_op[t] ) = 5100; #For 2025:7300#from SPF_Economie, versus 4300 from ELIA, versus 4327 from EU
+subject to elec_prod_GEOTHERMAL_2025: sum {t in PERIODS} (F_t ['YEAR_2025','GEOTHERMAL', t] * t_op[t] ) = 0; #pas encore regarder pour la géothermie#from EU
+subject to elec_prod_HYDRO_RIVER_2025: sum {t in PERIODS} (F_t ['YEAR_2025','HYDRO_RIVER', t] * t_op[t] ) = 353;#For 2025:400 #from EU (confirmed by SPF_Economie, 300)
+subject to elec_prod_COAL_US_2025: sum {t in PERIODS} (     F_t ['YEAR_2025','COAL_US', t] * t_op[t] ) = 1900; #je ne comprends pas ce que les 2 coals représentent #from SPF_Economie
+subject to elec_prod_COAL_IGCC_2025: sum {t in PERIODS} (   F_t ['YEAR_2025','COAL_IGCC', t] * t_op[t] ) = 0; #je ne comprends pas ce que les 2 coals représentent #As done by GL for 2015
 subject to no_elec_import_2025: sum {t in PERIODS} (   F_t ['YEAR_2025','ELECTRICITY', t] * t_op[t] ) = 0; #from SPF_Economie
 
 

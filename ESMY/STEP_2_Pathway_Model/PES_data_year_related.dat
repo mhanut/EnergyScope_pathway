@@ -122,14 +122,14 @@ MOBILITY_FREIGHT	0	0	0	69186.2
 NON_ENERGY	0	0	51450.5833	0
 																																																																																																																	
 ["YEAR_2025",*,*]: 	HOUSEHOLDS	SERVICES	INDUSTRY	TRANSPORTATION	:=																																																																																																												
-ELECTRICITY	11651.5	12226	33858.4	0
-LIGHTING	6273.9	9538	11152.2	0
-HEAT_HIGH_T	0	0	66453.5	0
-HEAT_LOW_T_SH	57368.9	30552.2	17286.8	0
-HEAT_LOW_T_HW	14664.7	6848.7	4478.9	0
-MOBILITY_PASSENGER	0	0	0	142038.7
-MOBILITY_FREIGHT	0	0	0	79054.1
-NON_ENERGY	0	0	52034.43913	0
+ELECTRICITY	1506.7	1862.7	3572.4	0
+LIGHTING	1506.7	1862.7	3572.4	0
+HEAT_HIGH_T	0	0	7260.4	0
+HEAT_LOW_T_SH	6357.9	3045.9	7260.4	0
+HEAT_LOW_T_HW	6357.9	3045.9	7260.4	0
+MOBILITY_PASSENGER	0	0	0	152011.6
+MOBILITY_FREIGHT	0	0	0	78010
+NON_ENERGY	0	0	51800.9	0
 																																																																																																																	
 ["YEAR_2030",*,*]: 	HOUSEHOLDS	SERVICES	INDUSTRY	TRANSPORTATION	:=																																																																																																												
 ELECTRICITY	10688.8	11784.4	43592.3	0
