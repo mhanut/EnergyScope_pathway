@@ -26,7 +26,6 @@ subject to bioethanol_2025: sum {t in PERIODS} (F_t ['YEAR_2025','BIOETHANOL', t
 subject to biodiesel_2025: sum {t in PERIODS} (F_t ['YEAR_2025','BIODIESEL', t] * t_op[t] ) = 7110.25 ;#From IEA : 717 millions de litres de biodiesel # 355.9 ktoe = >
 
 ### No import of electrofuels in 2020
-#je ne pas trouvé ces valeurs
 subject to no_H2_RE_2025: sum {t in PERIODS} (F_t ['YEAR_2025','H2_RE', t] * t_op[t] ) = 0.0;
 subject to no_GAS_RE_2025: sum {t in PERIODS} (F_t ['YEAR_2025','GAS_RE', t] * t_op[t] ) = 0.0;
 subject to no_AMMONIA_RE_2025: sum {t in PERIODS} (F_t ['YEAR_2025','AMMONIA_RE', t] * t_op[t] ) = 0.0;
@@ -34,7 +33,6 @@ subject to no_METHANOL_RE_2025: sum {t in PERIODS} (F_t ['YEAR_2025','METHANOL_R
 
 ### Production of biomethane
 # SOURCE: https://www.cng-mobility.ch/wp-content/uploads/2020/09/EBA-Conference-1-Sept-2020-Dirk-Focroul.pdf
-#From Eu : 3900, mais englobe d'autre biofuels je crois
 subject to biogas_2025: sum {t in PERIODS} (F_t ['YEAR_2025','BIOMETHANATION', t] * t_op[t] )  = 2500;
 
 ### Non-energy demand production ###
