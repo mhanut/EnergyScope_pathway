@@ -12,7 +12,7 @@ subject to elec_prod_NUCLEAR_2025: sum {t in PERIODS, h in HOUR_OF_PERIOD [t], t
 # subject to elec_prod_CCGT_2025: sum {t in PERIODS, h in HOUR_OF_PERIOD [t], td in TYPICAL_DAY_OF_PERIOD [t]} (        F_t ['YEAR_2025','CCGT', h , td] ) = 28843; #from SPF_Economie, versus 27 800 from ELIA, versus 27602 from EU
 subject to elec_prod_WIND_OFFSHORE_2025: sum {t in PERIODS, h in HOUR_OF_PERIOD [t], td in TYPICAL_DAY_OF_PERIOD [t]} ( F_t ['YEAR_2025','WIND_OFFSHORE', h , td] ) = 8000; #versus 6700 from ELIA, versus 6826 from EU (SPF_Economie gives 12.8 TWh for all the wind)
 subject to elec_prod_WIND_ONSHORE_2025: sum {t in PERIODS, h in HOUR_OF_PERIOD [t], td in TYPICAL_DAY_OF_PERIOD [t]}  ( F_t ['YEAR_2025','WIND_ONSHORE' , h , td])  = 6300; #from SPF_Economie, versus 4100 from ELIA, versus 4052 from EU (SPF_Economie gives 12.8 TWh for all the wind)
-subject to elec_prod_PV_2025: sum {t in PERIODS, h in HOUR_OF_PERIOD [t], td in TYPICAL_DAY_OF_PERIOD [t]} (F_t ['YEAR_2025','PV', h , td] ) = 6000; #from SPF_Economie, versus 4300 from ELIA, versus 4327 from EU
+subject to elec_prod_PV_2025: sum {t in PERIODS, h in HOUR_OF_PERIOD [t], td in TYPICAL_DAY_OF_PERIOD [t]} (F_t ['YEAR_2025','PV', h , td] ) = 7300; #from SPF_Economie, versus 4300 from ELIA, versus 4327 from EU
 subject to elec_prod_GEOTHERMAL_2025: sum {t in PERIODS, h in HOUR_OF_PERIOD [t], td in TYPICAL_DAY_OF_PERIOD [t]} (F_t ['YEAR_2025','GEOTHERMAL', h , td] ) = 0; #from EU
 subject to elec_prod_HYDRO_RIVER_2025: sum {t in PERIODS, h in HOUR_OF_PERIOD [t], td in TYPICAL_DAY_OF_PERIOD [t]} (F_t ['YEAR_2025','HYDRO_RIVER', h , td] ) = 400; #from EU (confirmed by SPF_Economie, 300)
 subject to elec_prod_COAL_US_2025: sum {t in PERIODS, h in HOUR_OF_PERIOD [t], td in TYPICAL_DAY_OF_PERIOD [t]} (     F_t ['YEAR_2025','COAL_US', h , td] ) = 1570; #from SPF_Economie
@@ -73,11 +73,11 @@ fix Share_heat_dhn['YEAR_2025']:=0.02; # As done by GL for 2015 because no addit
 
 ### shares private mobility ###
 # SOURCE: https://mobilit.belgium.be/sites/default/files/resources/files/chiffres_cles_mobilite_belgique_v2021.pdf
-let fmin_perc['YEAR_2025',"CAR_DIESEL"] := 0.278;
-let fmin_perc['YEAR_2025',"CAR_GASOLINE"] := 0.391;
-let fmin_perc['YEAR_2025',"CAR_HEV"] := 0.068;
+let fmin_perc['YEAR_2025',"CAR_DIESEL"] := 0.337;
+let fmin_perc['YEAR_2025',"CAR_GASOLINE"] := 0.581;
+let fmin_perc['YEAR_2025',"CAR_HEV"] := 0.066;
 let fmin_perc['YEAR_2025',"CAR_NG"] := 0.004;
-let fmin_perc['YEAR_2025',"CAR_BEV"] := 0.018;
+let fmin_perc['YEAR_2025',"CAR_BEV"] := 0.001;
 
 let fmax_perc['YEAR_2025',"CAR_PHEV"] := 0;
 let fmax_perc['YEAR_2025',"CAR_FUEL_CELL"] := 0;
