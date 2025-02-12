@@ -200,8 +200,8 @@ if __name__ == '__main__':
         # ampl_graph.graph_cost_op_phase() # Cumulative operational costs
         # ampl_graph.graph_cost_return() # Salvage value
 
-        # ampl_graph.graph_layer() # Prod-Cons graph per layer
-        ampl_graph.graph_tech_cap() # Installed capapcities per sector
+        #ampl_graph.graph_layer() # Prod-Cons graph per layer
+        #ampl_graph.graph_tech_cap() # Installed capapcities per sector
         # ampl_graph.graph_load_factor() # Load factor per sector
         # df_unused,_ = ampl_graph.graph_load_factor_scaled() # Scaled load factor
 
