@@ -373,10 +373,14 @@ subject to limit_energy_to_power_ratio {y in YEARS_WND diff YEAR_ONE, j in STORA
 subject to network_losses {y in YEARS_WND diff YEAR_ONE, eut in END_USES_TYPES, t in PERIODS}:
 	Network_losses [y, eut, t] = (sum {j in RESOURCES union TECHNOLOGIES diff STORAGE_TECH: layers_in_out [y,j, eut] > 0} ((layers_in_out[y,j, eut]) * F_t [y, j, t])) * loss_network [y,eut];
 
-# [Eq. 21] Extra grid cost for integrating 1 GW of RE is estimated to 367.8Meuros per GW of intermittent renewable (27beuros to integrate the overall potential) 
+# [Eq. 21] Extra grid cost for integrating 1 GW of RE is estimated to 367.8Meuros per GW of intermittent renewable (27beuros to integrate the overall potential)
 subject to extra_grid {y in YEARS_WND diff YEAR_ONE}:
-	F [y,"GRID"] >= 1 +  (c_grid_extra / c_inv[y,"GRID"]) *(    (F [y, "WIND_ONSHORE"] + F [y, "WIND_OFFSHORE"] + F [y, "PV"]      )
-					                                     - (f_min [y,"WIND_ONSHORE"] + f_min [y,"WIND_OFFSHORE"] + f_min [y,"PV"]) );
+#Modification de la contrainte: contraint aussi les voitures électriques
+#Si on suppose que 1 GW de recharge de VE coûte 300 M€ d’adaptation du réseau
+F [y,"GRID"] >= 1 + (c_grid_extra / c_inv[y,"GRID"]) * (
+                        (F [y, "WIND_ONSHORE"] + F [y, "WIND_OFFSHORE"] + F [y, "PV"])
+                      - (f_min [y,"WIND_ONSHORE"] + f_min [y,"WIND_OFFSHORE"] + f_min [y,"PV"])
+                      + 300/c_inv[y, "CAR_BEV"]* F[y, "CAR_BEV"]);
 
 
 # [Eq. 22] DHN: assigning a cost to the network
