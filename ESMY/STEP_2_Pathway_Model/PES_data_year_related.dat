@@ -55,6 +55,18 @@ YEAR_2045	0
 YEAR_2050	0																																																																																																																
 ;																																																																																																																		
 
+param f_max_EV :=
+YEAR_2015	9.739
+YEAR_2020	9.739
+YEAR_2025	9.739
+YEAR_2030	9.739
+YEAR_2035	9.739
+YEAR_2040	9.739
+YEAR_2045	9.739
+YEAR_2050	9.739
+;
+
+
 param gwp_limit := 			# [ktCO2-eq./year]	# Minimum GWP reduction compare to year 2011 (47.51 MTCO2_eq)																																																																																																													
 YEAR_2015	Infinity #156000																																																																																																																
 YEAR_2020	Infinity #133715																																																																																																																
@@ -101,7 +113,7 @@ YEAR_2050	250
 																																																																																																																	
 #param end_uses_demand_year {YEARS, END_USES_INPUT, SECTORS}																																																																																																																	
 param end_uses_demand_year :=																																																																																																																	
-["YEAR_2015",*,*]: 	HOUSEHOLDS	SERVICES	INDUSTRY	TRANSPORTATION	:=																																																																																																												
+["YEAR_2015",*,*]: 	HOUSEHOLDS	SERVICES	INDUSTRY	TRANSPORTATION	:=
 ELECTRICITY	14562	18564.1	12376.4	0
 LIGHTING	6711.6	9891.3	9844.5	0
 HEAT_HIGH_T	0	0	88063.7	0
@@ -111,7 +123,7 @@ MOBILITY_PASSENGER	0	0	0	146138.13
 MOBILITY_FREIGHT	0	0	0	70194.7
 NON_ENERGY	0	0	51478	0
 
-["YEAR_2020",*,*]: 	HOUSEHOLDS	SERVICES	INDUSTRY	TRANSPORTATION	:=																																																																																																												
+["YEAR_2020",*,*]: 	HOUSEHOLDS	SERVICES	INDUSTRY	TRANSPORTATION	:=
 ELECTRICITY	14236	17039.9	9752.2	0
 LIGHTING	6536.5	8702.3	8980.1	0
 HEAT_HIGH_T	0	0	84917.9	0
@@ -120,7 +132,7 @@ HEAT_LOW_T_HW	14588	9118.6	9517.3	0
 MOBILITY_PASSENGER	0	0	0	108679.1
 MOBILITY_FREIGHT	0	0	0	69186.2
 NON_ENERGY	0	0	51835	0
-																																																																																																																	
+
 ["YEAR_2025",*,*]:     HOUSEHOLDS SERVICES   INDUSTRY   TRANSPORTATION :=
 ELECTRICITY    13487  18016.4    13648.6    0
 LIGHTING   6133.1 9531.7 10386.8    0

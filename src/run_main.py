@@ -9,6 +9,7 @@ Created on Mon May 17 10:21 2021
 import os, sys
 from pathlib import Path
 
+
 import time  # To print the time needed for one optimisation
 import rheia.UQ.uncertainty_quantification as rheia_uq
 
@@ -42,13 +43,13 @@ CO2_neutrality_2050_val = 3406.92  # Value equivalent to CO2-neutrality in 2050
 # [ktCO2,eq]
 
 run_opti = True  # True to run optimisation
-graph = True  # True to plot graphs for deterministic run
+graph = True # True to plot graphs for deterministic run
 graph_comp = False  # True to plot comparative graphs between two deterministic
 # runs
 
-case_study = 'clever_sans_lithium_avec_contrainte_voiture'  # Give here the name of the case study for
+case_study = 'scenario_clever_with_lithium'  # Give here the name of the case study for
 # deterministic run
-expl_text = 'clever_sans_lithium_modification_contrainte_grid'  # Give here explanation text to describe the
+expl_text = 'clever_with_constraint_lithium'  # Give here explanation text to describe the
 # case study
 
 # %% Join the .dat and .mod files depending on the type of model (MO or TD).
@@ -217,7 +218,7 @@ if __name__ == '__main__':
         output_file_2 = os.path.join(output_folder_2, '_Results.pkl')
 
         # Reference case: TD-Perfect foresight
-        case_study_1 = 'case_ref'
+        case_study_1 = 'test_test'
         output_folder_1 = os.path.join(pth_output_all, case_study_1)
         output_file_1 = os.path.join(output_folder_1, '_Results.pkl')
 
@@ -225,7 +226,7 @@ if __name__ == '__main__':
 
         # ampl_graph.graph_comparison(output_files,'C_inv_phase_tech')
         # ampl_graph.graph_comparison(output_files,'C_op_phase')
-        # ampl_graph.graph_comparison(output_files,'Resources')
+        ampl_graph.graph_comparison(output_files,'Resources')
         # ampl_graph.graph_comparison(output_files,'Cost_return')
         # ampl_graph.graph_comparison(output_files,'Total_trans_cost')
         # ampl_graph.graph_comparison(output_files,'Total_system_cost')
