@@ -139,7 +139,8 @@ param storage_discharge_time {YEARS, STORAGE_TECH} >= 0 default 0; # t_sto_out [
 param storage_availability {YEARS, STORAGE_TECH} >=0, default 1;# %_sto_avail [-]: Storage technology availability to charge/discharge. Used for EVs 
 param loss_network {YEARS, END_USES_TYPES} >= 0 default 0; # %_net_loss: Losses coefficient [0; 1] in the networks (grid and DHN)
 param batt_per_car {YEARS, V2G} >= 0 default 0; # ev_Batt_size [GWh]: Battery size per EVs car technology
-param c_grid_extra >=0; # # Cost to reinforce the grid due to IRE penetration [Meuros/GW of (PV + Wind)].
+param c_grid_extra >=0;# # Cost to reinforce the grid due to IRE penetration [Meuros/GW of (PV + Wind)].
+param c_grid_extra2 >=0;
 param elec_max_import_capa  {YEARS} >=0;
 param solar_area	 {YEARS} >= 0; # Maximum land available for PV deployment [km2]
 param power_density_pv >=0 default 0;# Maximum power irradiance for PV.
@@ -383,13 +384,20 @@ F [y,"GRID"] >= 1 + (c_grid_extra / c_inv[y,"GRID"]) * (
                       - (f_min [y,"WIND_ONSHORE"] + f_min [y,"WIND_OFFSHORE"] + f_min [y,"PV"])
                       + 300/c_inv[y, "CAR_BEV"]* F[y, "CAR_BEV"]);
 
+#Duplication de grid pour les couts des infrastructures des EV
+subject to extra_grid2 {y in YEARS_WND diff YEAR_ONE}:
+    F [y,"GRID2"] >= 1 + (c_grid_extra2 / c_inv[y,"GRID2"]) * (
+                        (F [y, "CAR_BEV"] + F [y, "CAR_PHEV"] + F [y, "CAR_HEV"])
+                      - (f_min [y,"CAR_BEV"] + f_min [y,"CAR_PHEV"] + f_min [y,"CAR_HEV"]));
+
+
+
 
 # [Eq. 22] DHN: assigning a cost to the network
 subject to extra_dhn  {y in YEARS_WND diff YEAR_ONE}:
 	F [y, "DHN"] = sum {j in TECHNOLOGIES diff STORAGE_TECH: layers_in_out [y, j,"HEAT_LOW_T_DHN"] > 0} (layers_in_out [y, j,"HEAT_LOW_T_DHN"] * F [y, j]);
 
-subject to max_ev {y in YEARS_WND diff YEAR_ONE}:
-	F[y, "CAR_BEV"] + F[y, "CAR_PHEV"]/2 + F[y, "CAR_HEV"]/2 <= f_max_EV[y];
+
 
 
 
