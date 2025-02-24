@@ -200,7 +200,7 @@ class AmplObject:
     
     def clean_history(self):
         open(os.path.join(self.dir,'fix.mod'), 'w').close()
-        open(os.path.join(self.dir,'PESTD_data_remaining_wnd.dat'), 'w').close()
+        open(os.path.join(self.dir,'PES_data_remaining_wnd.dat'), 'w').close()
         open(os.path.join(self.dir,'PES_seq_opti.dat'), 'w').close()
 
     """"

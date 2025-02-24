@@ -194,15 +194,15 @@ if __name__ == '__main__':
 
         output_file = pth_output_all + '/' + case_study + '/_Results.pkl'
         ampl_graph = AmplGraph(output_file, ampl_0, case_study)
-        # ampl_graph.graph_resource()  # Primary energy mix
-        # ampl_graph.graph_cost()  # Total annual system cost
+        ampl_graph.graph_resource()  # Primary energy mix
+        ampl_graph.graph_cost()  # Total annual system cost
         # ampl_graph.graph_gwp_per_sector() # GWP per energy sector
         # ampl_graph.graph_cost_inv_phase_tech() # Cumulative investment costs
         # ampl_graph.graph_cost_op_phase() # Cumulative operational costs
         # ampl_graph.graph_cost_return() # Salvage value
 
         #ampl_graph.graph_layer() # Prod-Cons graph per layer
-        ampl_graph.graph_tech_cap() # Installed capapcities per sector
+        #ampl_graph.graph_tech_cap() # Installed capapcities per sector
         # ampl_graph.graph_load_factor() # Load factor per sector
         # df_unused,_ = ampl_graph.graph_load_factor_scaled() # Scaled load factor
 

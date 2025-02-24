@@ -381,14 +381,27 @@ subject to extra_grid {y in YEARS_WND diff YEAR_ONE}:
 #Si on suppose que 1 GW de recharge de VE coûte 300 M€ d’adaptation du réseau
 F [y,"GRID"] >= 1 + (c_grid_extra / c_inv[y,"GRID"]) * (
                         (F [y, "WIND_ONSHORE"] + F [y, "WIND_OFFSHORE"] + F [y, "PV"])
-                      - (f_min [y,"WIND_ONSHORE"] + f_min [y,"WIND_OFFSHORE"] + f_min [y,"PV"])
-                      + 300/c_inv[y, "CAR_BEV"]* F[y, "CAR_BEV"]);
+                      - (f_min [y,"WIND_ONSHORE"] + f_min [y,"WIND_OFFSHORE"] + f_min [y,"PV"]));
 
 #Duplication de grid pour les couts des infrastructures des EV
+#Définition des variables auxiliaires
+#X : représente le surplus de véhicules électrifiés par rapport au minimum requis, assure qu'on n'a pas une valeur négative
+#slack : variable de relaxation qui permet d'éviter une infeasibility
+var X {y in YEARS_WND diff YEAR_ONE} >= 0;
+var slack {y in YEARS_WND diff YEAR_ONE} >= 0;
+
+#Définition de la contrainte pour X
+subject to def_X {y in YEARS_WND diff YEAR_ONE}:
+    X[y] = (F[y, "CAR_BEV"] + F[y, "CAR_PHEV"] + F[y, "CAR_HEV"])
+         - (f_min[y, "CAR_BEV"] + f_min[y, "CAR_PHEV"] + f_min[y, "CAR_HEV"]);
+
+#Contrainte corrigée avec la variable X et la relaxation slack[y]
 subject to extra_grid2 {y in YEARS_WND diff YEAR_ONE}:
-    F [y,"GRID2"] >= 1 + (c_grid_extra2 / c_inv[y,"GRID2"]) * (
-                        (F [y, "CAR_BEV"] + F [y, "CAR_PHEV"] + F [y, "CAR_HEV"])
-                      - (f_min [y,"CAR_BEV"] + f_min [y,"CAR_PHEV"] + f_min [y,"CAR_HEV"]));
+    F[y, "GRID2"] + slack[y] >= 1 + (c_grid_extra2 / c_inv[y, "GRID2"]) * X[y];
+
+#Ajout d'un terme dans la fonction objectif pour limiter la relaxation
+minimize slack_penalty:
+    sum {y in YEARS_WND diff YEAR_ONE} slack[y];
 
 
 
