@@ -42,14 +42,14 @@ CO2_neutrality_2050 = True  # True if setting the GWP of 2050 to carbon-
 CO2_neutrality_2050_val = 3406.92  # Value equivalent to CO2-neutrality in 2050
 # [ktCO2,eq]
 
-run_opti = False  # True to run optimisation
-graph = False # True to plot graphs for deterministic run
-graph_comp = True  # True to plot comparative graphs between two deterministic
+run_opti = True  # True to run optimisation
+graph = True # True to plot graphs for deterministic run
+graph_comp = False  # True to plot comparative graphs between two deterministic
 # runs
 
-case_study = 'scenario_clever_with_lithium'  # Give here the name of the case study for
+case_study = 'scenario_clever_cost_EV'  # Give here the name of the case study for
 # deterministic run
-expl_text = 'clever_with_numberofEV'  # Give here explanation text to describe the
+expl_text = 'clever_cost_EV'  # Give here explanation text to describe the
 # case study
 
 # %% Join the .dat and .mod files depending on the type of model (MO or TD).
@@ -202,7 +202,7 @@ if __name__ == '__main__':
         # ampl_graph.graph_cost_return() # Salvage value
 
         #ampl_graph.graph_layer() # Prod-Cons graph per layer
-        ampl_graph.graph_tech_cap() # Installed capapcities per sector
+        #ampl_graph.graph_tech_cap() # Installed capapcities per sector
         # ampl_graph.graph_load_factor() # Load factor per sector
         # df_unused,_ = ampl_graph.graph_load_factor_scaled() # Scaled load factor
 
@@ -218,7 +218,7 @@ if __name__ == '__main__':
         output_file_2 = os.path.join(output_folder_2, '_Results.pkl')
 
         # Reference case: TD-Perfect foresight
-        case_study_1 ='scenario_clever'
+        case_study_1 = 'test_test'
         output_folder_1 = os.path.join(pth_output_all, case_study_1)
         output_file_1 = os.path.join(output_folder_1, '_Results.pkl')
 
