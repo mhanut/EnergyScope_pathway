@@ -47,9 +47,9 @@ graph = True # True to plot graphs for deterministic run
 graph_comp = False  # True to plot comparative graphs between two deterministic
 # runs
 
-case_study = 'scenario_clever_cost_EV'  # Give here the name of the case study for
+case_study = 'scenario_clever'  # Give here the name of the case study for
 # deterministic run
-expl_text = 'clever_cost_EV'  # Give here explanation text to describe the
+expl_text = 'clever'  # Give here explanation text to describe the
 # case study
 
 # %% Join the .dat and .mod files depending on the type of model (MO or TD).
@@ -202,7 +202,7 @@ if __name__ == '__main__':
         # ampl_graph.graph_cost_return() # Salvage value
 
         #ampl_graph.graph_layer() # Prod-Cons graph per layer
-        #ampl_graph.graph_tech_cap() # Installed capapcities per sector
+        ampl_graph.graph_tech_cap() # Installed capapcities per sector
         # ampl_graph.graph_load_factor() # Load factor per sector
         # df_unused,_ = ampl_graph.graph_load_factor_scaled() # Scaled load factor
 
