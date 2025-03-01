@@ -98,10 +98,9 @@ param end_uses_demand_year {YEARS, END_USES_INPUT, SECTORS} >= 0 default 0; # en
 param end_uses_input {y in YEARS, i in END_USES_INPUT} := sum {s in SECTORS} (end_uses_demand_year [y,i,s]); # end_uses_input (Figure 1.4) [GWh]: total demand for each type of end-uses across sectors (yearly energy) as input from the demand-side model. [Mpkm] or [Mtkm] for passenger or freight mobility.
 param i_rate > 0 default 0.015; # discount rate [-]: real discount rate
 param re_share_primary {YEARS} >= 0 default 0; # re_share [-]: minimum share of primary energy coming from RE
-param f_max_EV {YEARS} >= 0 default 0; # maximum number of electric cars based on limit of lithium-ion batteries
 param gwp_limit {YEARS} >= 0 default 0;    # [ktCO2-eq./year] maximum gwp emissions allowed.
-param share_mobility_public_min {YEARS} >= 0, <= 1 default 0; # %_public,min [-]: min limit for penetration of public mobility over total mobility 
-param share_mobility_public_max {YEARS} >= 0, <= 1 default 0; # %_public,max [-]: max limit for penetration of public mobility over total mobility 
+param share_mobility_public_min {YEARS} >= 0, <= 1 default 0; # %_public,min [-]: min limit for penetration of public mobility over total mobility
+param share_mobility_public_max {YEARS} >= 0, <= 1 default 0; # %_public,max [-]: max limit for penetration of public mobility over total mobility
 # Share train vs truck in freight transportation
 param share_freight_train_min {YEARS} >= 0, <= 1 default 0; # % min limit for penetration of train in freight transportation
 param share_freight_train_max {YEARS} >= 0, <= 1 default 0; # % max limit for penetration of train in freight transportation
@@ -136,11 +135,10 @@ param storage_eff_out {YEARS, STORAGE_TECH , LAYERS} >= 0, <= 1 default 0; # eta
 param storage_losses {YEARS, STORAGE_TECH} >= 0, <= 1 default 0; # %_sto_loss [-]: Self losses in storage (required for Li-ion batteries). Value = self discharge in 1 hour.
 param storage_charge_time    {YEARS, STORAGE_TECH} >= 0 default 0; # t_sto_in [h]: Time to charge storage (Energy to Power ratio). If value =  5 <=>  5h for a full charge.
 param storage_discharge_time {YEARS, STORAGE_TECH} >= 0 default 0; # t_sto_out [h]: Time to discharge storage (Energy to Power ratio). If value =  5 <=>  5h for a full discharge.
-param storage_availability {YEARS, STORAGE_TECH} >=0, default 1;# %_sto_avail [-]: Storage technology availability to charge/discharge. Used for EVs 
+param storage_availability {YEARS, STORAGE_TECH} >=0, default 1;# %_sto_avail [-]: Storage technology availability to charge/discharge. Used for EVs
 param loss_network {YEARS, END_USES_TYPES} >= 0 default 0; # %_net_loss: Losses coefficient [0; 1] in the networks (grid and DHN)
 param batt_per_car {YEARS, V2G} >= 0 default 0; # ev_Batt_size [GWh]: Battery size per EVs car technology
-param c_grid_extra >=0;# # Cost to reinforce the grid due to IRE penetration [Meuros/GW of (PV + Wind)].
-param c_grid_extra2 >=0;
+param c_grid_extra >=0; # # Cost to reinforce the grid due to IRE penetration [Meuros/GW of (PV + Wind)].
 param elec_max_import_capa  {YEARS} >=0;
 param solar_area	 {YEARS} >= 0; # Maximum land available for PV deployment [km2]
 param power_density_pv >=0 default 0;# Maximum power irradiance for PV.
@@ -213,12 +211,12 @@ var Storage_level {YEARS, STORAGE_TECH, PERIODS} >= 0; # Sto_level [GWh]: Energy
 
 
 
-## End-uses demand calculation constraints 
+## End-uses demand calculation constraints
 #-----------------------------------------
 
 # [Figure 4] From annual energy demand to hourly power demand. End_uses is non-zero only for demand layers.
 subject to end_uses_t {y in YEARS_WND diff YEAR_ONE, l in LAYERS, t in PERIODS}:
-	End_uses [y,l, t] = (if l == "ELECTRICITY" 
+	End_uses [y,l, t] = (if l == "ELECTRICITY"
 		then
 			(end_uses_input[y,l] / total_time + end_uses_input[y,"LIGHTING"] * lighting_month [t] / t_op [t]) + Network_losses [y,l,t]
 		else (if l == "HEAT_LOW_T_DHN" then
@@ -243,24 +241,24 @@ subject to end_uses_t {y in YEARS_WND diff YEAR_ONE, l in LAYERS, t in PERIODS}:
 			end_uses_input[y,"NON_ENERGY"] * share_ned [y,"AMMONIA"] / total_time
 		else (if l == "METHANOL" then
 			end_uses_input[y,"NON_ENERGY"] * share_ned [y,"METHANOL"] / total_time
-		else 
+		else
 			0 )))))))))))); # For all layers which don't have an end-use demand
 
 
 ## Cost
 #------
 
-# [Eq. 1]	
+# [Eq. 1]
 subject to totalcost_cal {y in YEARS_UP_TO union YEARS_WND}:
 	TotalCost [y] = sum {j in TECHNOLOGIES} (tau [y,j]  * C_inv [y,j] + C_maint [y,j]) + sum {i in RESOURCES} C_op [y,i];
-	
+
 # [Eq. 3] Investment cost of each technology
-subject to investment_cost_calc {y in YEARS_UP_TO union YEARS_WND,j in TECHNOLOGIES}: 
+subject to investment_cost_calc {y in YEARS_UP_TO union YEARS_WND,j in TECHNOLOGIES}:
 	C_inv [y,j] = c_inv [y,j] * F [y,j];
-		
+
 # [Eq. 4] O&M cost of each technology
-subject to main_cost_calc {y in YEARS_UP_TO union YEARS_WND, j in TECHNOLOGIES}: 
-	C_maint [y,j] = c_maint [y,j] * F [y,j];		
+subject to main_cost_calc {y in YEARS_UP_TO union YEARS_WND, j in TECHNOLOGIES}:
+	C_maint [y,j] = c_maint [y,j] * F [y,j];
 
 # [Eq. 5] Total cost of each resource
 ## To store resources used
@@ -278,34 +276,34 @@ subject to totalGWP_calc {y in YEARS_UP_TO union YEARS_WND}:
 	TotalGWP [y] =  sum {i in RESOURCES} GWP_op [y,i];
 	#JUST RESOURCES : TotalGWP [y] =  sum {i in RESOURCES} GWP_op [y,i];
 	#BASED ON LCA:    TotalGWP [y] = sum {j in TECHNOLOGIES} (GWP_constr [y,j] / lifetime [y,j]) + sum {i in RESOURCES} GWP_op [y,i];
-	
+
 # [Eq. 7]
 subject to gwp_constr_calc {y in YEARS_UP_TO union YEARS_WND, j in TECHNOLOGIES}:
 	GWP_constr [y,j] = gwp_constr [y,j] * F [y,j];
 
 # [Eq. 8]
 subject to gwp_op_calc {y in YEARS_UP_TO union YEARS_WND, i in RESOURCES}:
-	GWP_op [y,i] = gwp_op [y,i] * Res [y,i];	
+	GWP_op [y,i] = gwp_op [y,i] * Res [y,i];
 
 # [Eq. XX] total transition gwp calculation
 subject to totalGWPTransition_calculation : # category: GWP_calc
 	TotalGWPTransition = TotalGWP ["YEAR_2025"] + sum {p in PHASE_UP_TO union PHASE_WND,y_start in PHASE_START [p],y_stop in PHASE_STOP [p]}  (t_phase * (TotalGWP [y_start] + TotalGWP [y_stop])/2);
-	
+
 ## Multiplication factor
 #-----------------------
-	
+
 # [Eq. 9] min & max limit to the size of each technology
 subject to size_limit {y in YEARS_WND diff YEAR_ONE, j in TECHNOLOGIES}:
 	f_min [y,j] <= F [y,j] <= f_max [y,j];
-	
+
 # [Eq. 10] relation between power and capacity via period capacity factor. This forces max hourly output (e.g. renewables)
 subject to capacity_factor_t {y in YEARS_WND diff YEAR_ONE, j in TECHNOLOGIES, t in PERIODS}:
 	F_t [y,j, t] <= F [y,j] * c_p_t [y, j, t];
-	
+
 # [Eq. 11] relation between mult_t and mult via yearly capacity factor. This one forces total annual output
 subject to capacity_factor {y in YEARS_WND diff YEAR_ONE, j in TECHNOLOGIES}:
-	sum {t in PERIODS} (F_t [y,j, t] * t_op [t]) <= F [y,j] * c_p [y,j] * total_time;	
-		
+	sum {t in PERIODS} (F_t [y,j, t] * t_op [t]) <= F [y,j] * c_p [y,j] * total_time;
+
 ## Resources
 #-----------
 
@@ -325,46 +323,46 @@ subject to resource_constant_import {y in YEARS_WND diff YEAR_ONE, i in RES_IMPO
 # [Eq. 13] Layer balance equation with storage. Layers: input > 0, output < 0. Demand > 0. Storage: in > 0, out > 0;
 # output from technologies/resources/storage - input to technologies/storage = demand. Demand has default value of 0 for layers which are not end_uses
 subject to layer_balance {y in YEARS_WND diff YEAR_ONE, l in LAYERS, t in PERIODS}:
-		sum {i in RESOURCES union TECHNOLOGIES diff STORAGE_TECH } 
-		(layers_in_out[y,i, l] * F_t [y,i, t]) 
+		sum {i in RESOURCES union TECHNOLOGIES diff STORAGE_TECH }
+		(layers_in_out[y,i, l] * F_t [y,i, t])
 		+ sum {j in STORAGE_TECH diff STORAGE_DAILY} (Storage_out [y,j, l, t] - Storage_in [y,j, l, t] )
 		- End_uses [y, l, t]
 		= 0;
-	
-## Storage	
+
+## Storage
 #---------
-	
+
 # [Eq. 14] The level of the storage represents the amount of energy stored at a certain time.
 subject to storage_level {y in YEARS_WND diff YEAR_ONE, j in STORAGE_TECH diff STORAGE_DAILY, t in PERIODS}:
 	Storage_level [y, j, t] = (if t == 1 then
 	 			Storage_level [y, j, card(PERIODS)] * (1.0 -  storage_losses[y,j])
-				+ t_op [t] * (   (sum {l in LAYERS: storage_eff_in [y,j,l] > 0}  (Storage_in [y, j, l, t]  * storage_eff_in  [y, j, l])) 
+				+ t_op [t] * (   (sum {l in LAYERS: storage_eff_in [y,j,l] > 0}  (Storage_in [y, j, l, t]  * storage_eff_in  [y, j, l]))
 				                   - (sum {l in LAYERS: storage_eff_out [y,j,l] > 0} (Storage_out [y, j, l, t] / storage_eff_out [y, j, l])))
 	else
 	 			Storage_level [y, j, t-1] * (1.0 -  storage_losses[y, j])
-				+ t_op [t] * (   (sum {l in LAYERS: storage_eff_in [y, j,l] > 0}  (Storage_in [y, j, l, t]  * storage_eff_in  [y, j, l])) 
+				+ t_op [t] * (   (sum {l in LAYERS: storage_eff_in [y, j,l] > 0}  (Storage_in [y, j, l, t]  * storage_eff_in  [y, j, l]))
 				                   - (sum {l in LAYERS: storage_eff_out [y, j,l] > 0} (Storage_out [y, j, l, t] / storage_eff_out [y, j, l])))
 				);
 
 # [Eq. 15] Bounding daily storage
 subject to impose_storage {y in YEARS_WND diff YEAR_ONE, j in STORAGE_TECH diff STORAGE_DAILY, t in PERIODS}:
 	Storage_level [y, j, t] = F_t [y, j, t];
-	
+
 # [Eq. 16] Bounding seasonal storage
 subject to limit_energy_stored_to_maximum {y in YEARS_WND diff YEAR_ONE, j in STORAGE_TECH diff STORAGE_DAILY, t in PERIODS}:
 	Storage_level [y, j, t] <= F [y, j];# Never exceed the size of the storage unit
-	
+
 # [Eqs. 17-18] Each storage technology can have input/output only to certain layers. If incompatible then the variable is set to 0
 subject to storage_layer_in {y in YEARS_WND diff YEAR_ONE, j in STORAGE_TECH diff STORAGE_DAILY, l in LAYERS, t in PERIODS}:
 	(if storage_eff_in [y, j, l]=0 then  Storage_in [y, j, l, t]  = 0);
 subject to storage_layer_out {y in YEARS_WND diff YEAR_ONE, j in STORAGE_TECH diff STORAGE_DAILY, l in LAYERS, t in PERIODS}:
 	(if storage_eff_out [y, j, l]=0 then  Storage_out [y, j, l, t]  = 0);
-		
-# [Eq. 19] limit the Energy to power ratio. 
+
+# [Eq. 19] limit the Energy to power ratio.
 subject to limit_energy_to_power_ratio {y in YEARS_WND diff YEAR_ONE, j in STORAGE_TECH diff {"BEV_BATT","PHEV_BATT"} diff STORAGE_DAILY, l in LAYERS, t in PERIODS}:
 	Storage_in [y, j, l, t] * storage_charge_time[y, j] + Storage_out [y, j, l, t] * storage_discharge_time[y, j] <=  F [y, j] * storage_availability[y, j];
 
-# # [Eq. 19] limit the Energy to power ratio. 
+# # [Eq. 19] limit the Energy to power ratio.
 # subject to limit_energy_to_power_ratio_bis {y in YEARS_WND diff YEAR_ONE, i in V2G, j in EVs_BATT_OF_V2G[i] , l in LAYERS, h in HOURS, td in TYPICAL_DAYS}:
 # 	Storage_in [y, j, l, h, td] * storage_charge_time[y, j] + (Storage_out [y, j, l, h, td] + layers_in_out[y, i,"ELECTRICITY"]* F_t [y, i, h, td] ) * storage_discharge_time[y, j] <=  (F [y, j] - F_t[y,i,h,td] / vehicule_capacity[y,i] * batt_per_car[y,i] ) * storage_availability[y, j];
 
@@ -381,29 +379,8 @@ subject to extra_grid {y in YEARS_WND diff YEAR_ONE}:
 #Si on suppose que 1 GW de recharge de VE coûte 300 M€ d’adaptation du réseau
 F [y,"GRID"] >= 1 + (c_grid_extra / c_inv[y,"GRID"]) * (
                         (F [y, "WIND_ONSHORE"] + F [y, "WIND_OFFSHORE"] + F [y, "PV"])
-                      - (f_min [y,"WIND_ONSHORE"] + f_min [y,"WIND_OFFSHORE"] + f_min [y,"PV"]));
-
-#Duplication de grid pour les couts des infrastructures des EV
-#Définition des variables auxiliaires
-#X : représente le surplus de véhicules électrifiés par rapport au minimum requis, assure qu'on n'a pas une valeur négative
-#slack : variable de relaxation qui permet d'éviter une infeasibility
-var X {y in YEARS_WND diff YEAR_ONE} >= 0;
-var slack {y in YEARS_WND diff YEAR_ONE} >= 0;
-
-#Définition de la contrainte pour X
-subject to def_X {y in YEARS_WND diff YEAR_ONE}:
-    X[y] = (F[y, "CAR_BEV"] + F[y, "CAR_PHEV"] + F[y, "CAR_HEV"])
-         - (f_min[y, "CAR_BEV"] + f_min[y, "CAR_PHEV"] + f_min[y, "CAR_HEV"]);
-
-#Contrainte corrigée avec la variable X et la relaxation slack[y]
-subject to extra_grid2 {y in YEARS_WND diff YEAR_ONE}:
-    F[y, "GRID2"] + slack[y] >= 1 + (c_grid_extra2 / c_inv[y, "GRID2"]) * X[y];
-
-#Ajout d'un terme dans la fonction objectif pour limiter la relaxation
-minimize slack_penalty:
-    sum {y in YEARS_WND diff YEAR_ONE} slack[y];
-
-
+                      - (f_min [y,"WIND_ONSHORE"] + f_min [y,"WIND_OFFSHORE"] + f_min [y,"PV"])
+                      + 300/c_inv[y, "CAR_BEV"]* F[y, "CAR_BEV"]);
 
 
 # [Eq. 22] DHN: assigning a cost to the network
