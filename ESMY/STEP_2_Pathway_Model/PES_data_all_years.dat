@@ -55,7 +55,7 @@ set TECHNOLOGIES_OF_END_USES_TYPE["METHANOL"] := 	SYN_METHANOLATION	METHANE_TO_M
 set TECHNOLOGIES_OF_END_USES_TYPE["HVC"] := 	OIL_TO_HVC	GAS_TO_HVC	BIOMASS_TO_HVC	METHANOL_TO_HVC	;																									
 																														
 set STORAGE_TECH :=			 PHS BATT_LI 	BEV_BATT 	PHEV_BATT 	TS_DEC_HP_ELEC	 TS_DEC_DIRECT_ELEC	  TS_DHN_DAILY	  TS_DHN_SEASONAL	 TS_DEC_THHP_GAS	TS_DEC_COGEN_GAS	TS_DEC_COGEN_OIL	TS_DEC_ADVCOGEN_GAS	TS_DEC_ADVCOGEN_H2	TS_DEC_BOILER_GAS	TS_DEC_BOILER_WOOD	TS_DEC_BOILER_OIL	TS_HIGH_TEMP	 GAS_STORAGE	H2_STORAGE 	CO2_STORAGE GASOLINE_STORAGE	DIESEL_STORAGE	METHANOL_STORAGE	AMMONIA_STORAGE	LFO_STORAGE;					
-set INFRASTRUCTURE  :=	EFFICIENCY	DHN	GRID	GRID2	H2_ELECTROLYSIS	SMR	H2_BIOMASS	GASIFICATION_SNG	SYN_METHANATION	BIOMETHANATION	BIO_HYDROLYSIS	PYROLYSIS_TO_LFO PYROLYSIS_TO_FUELS	ATM_CCS	INDUSTRY_CCS	AMMONIA_TO_H2	;
+set INFRASTRUCTURE  :=	EFFICIENCY	DHN	GRID	GRID2	GRID_NG	GRID_FUELCELL	H2_ELECTROLYSIS	SMR	H2_BIOMASS	GASIFICATION_SNG	SYN_METHANATION	BIOMETHANATION	BIO_HYDROLYSIS	PYROLYSIS_TO_LFO PYROLYSIS_TO_FUELS	ATM_CCS	INDUSTRY_CCS	AMMONIA_TO_H2	;
 set RE_TECH := PV	WIND_ONSHORE	WIND_OFFSHORE;
 																														
 # Storage subsets																														
@@ -63,7 +63,8 @@ set EVs_BATT  := 	 BEV_BATT 	PHEV_BATT;
 set V2G   := CAR_PHEV	CAR_BEV;																													
 set STORAGE_DAILY := 	BEV_BATT 	PHEV_BATT 	TS_DEC_HP_ELEC	TS_DEC_THHP_GAS	TS_DEC_COGEN_GAS	TS_DEC_COGEN_OIL	TS_DEC_ADVCOGEN_GAS	TS_DEC_ADVCOGEN_H2	TS_DEC_BOILER_GAS	TS_DEC_BOILER_WOOD	TS_DEC_BOILER_OIL	TS_DEC_DIRECT_ELEC 	TS_DHN_DAILY 	BATT_LI	TS_HIGH_TEMP	;														
 																														
-set STORAGE_OF_END_USES_TYPES ["HEAT_LOW_T_DHN"] := 	TS_DHN_DAILY 	TS_DHN_SEASONAL;																												
+
+set STORAGE_OF_END_USES_TYPES ["HEAT_LOW_T_DHN"] := 	TS_DHN_DAILY 	TS_DHN_SEASONAL;
 set STORAGE_OF_END_USES_TYPES ["HEAT_LOW_T_DECEN"] := 	TS_DEC_HP_ELEC	TS_DEC_THHP_GAS	TS_DEC_COGEN_GAS	TS_DEC_COGEN_OIL	TS_DEC_ADVCOGEN_GAS	TS_DEC_ADVCOGEN_H2	TS_DEC_BOILER_GAS	TS_DEC_BOILER_WOOD	TS_DEC_BOILER_OIL	TS_DEC_DIRECT_ELEC;																				
 set STORAGE_OF_END_USES_TYPES ["ELECTRICITY"] := 	PHS 	BATT_LI;																												
 set STORAGE_OF_END_USES_TYPES ["HEAT_HIGH_T"] := 	TS_HIGH_TEMP	;																												
@@ -120,6 +121,8 @@ param	limit_freight_changes	:=	0.5	;#50% of refurbishment per period (5years)
 																														
 param c_grid_extra :=	3.68E+02	;	# cost to reinforce the grid due to intermittent renewable energy penetration. See 2.2.2																											
 param c_grid_extra2 :=	3.68E+02	;	# cost to reinforce the grid due to intermittent renewable energy penetration. See 2.2.2
+param c_grid_extra_NG :=	3.68E+02	;	# cost to reinforce the grid due to intermittent renewable energy penetration. See 2.2.2
+param c_grid_extra_FUELCELL :=	3.68E+02	;	# cost to reinforce the grid due to intermittent renewable energy penetration. See 2.2.2
 
 param power_density_pv :=	0.2367	;																												
 param power_density_solar_thermal :=	0.2857	;																																																									

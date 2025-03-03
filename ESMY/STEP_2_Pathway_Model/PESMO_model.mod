@@ -141,6 +141,8 @@ param loss_network {YEARS, END_USES_TYPES} >= 0 default 0; # %_net_loss: Losses 
 param batt_per_car {YEARS, V2G} >= 0 default 0; # ev_Batt_size [GWh]: Battery size per EVs car technology
 param c_grid_extra >=0;# # Cost to reinforce the grid due to IRE penetration [Meuros/GW of (PV + Wind)].
 param c_grid_extra2 >=0;
+param c_grid_extra_NG >=0;
+param c_grid_extra_FUELCELL >=0;
 param elec_max_import_capa  {YEARS} >=0;
 param solar_area	 {YEARS} >= 0; # Maximum land available for PV deployment [km2]
 param power_density_pv >=0 default 0;# Maximum power irradiance for PV.
@@ -383,12 +385,21 @@ F [y,"GRID"] >= 1 + (c_grid_extra / c_inv[y,"GRID"]) * (
                         (F [y, "WIND_ONSHORE"] + F [y, "WIND_OFFSHORE"] + F [y, "PV"])
                       - (f_min [y,"WIND_ONSHORE"] + f_min [y,"WIND_OFFSHORE"] + f_min [y,"PV"]));
 
-
+#Contrainte pour véhicules électriques
 subject to extra_grid2 {y in YEARS_WND diff YEAR_ONE}:
 F [y,"GRID2"] >= 1 + (c_grid_extra2 / c_inv[y,"GRID2"]) * (
 		(F [y, "CAR_BEV"] + F [y, "CAR_HEV"] + F [y, "CAR_PHEV"])
                       - (f_min [y,"CAR_BEV"] + f_min [y,"CAR_HEV"] + f_min [y,"CAR_PHEV"]));
 
+#Contrainte pour voiture ng
+subject to extra_grid_NG {y in YEARS_WND diff YEAR_ONE}:
+F [y,"GRID_NG"] >= 1 + (c_grid_extra_NG / c_inv[y,"GRID_NG"]) * (
+		(F [y, "CAR_NG"])- (f_min [y,"CAR_NG"]));
+
+#Contrainte pour voiture fuel cell
+subject to extra_grid_FUELCELL {y in YEARS_WND diff YEAR_ONE}:
+F [y,"GRID_FUELCELL"] >= 1 + (c_grid_extra_FUELCELL / c_inv[y,"GRID_FUELCELL"]) * (
+		(F [y, "CAR_FUEL_CELL"])- (f_min [y,"CAR_FUEL_CELL"]));
 
 
 # [Eq. 22] DHN: assigning a cost to the network

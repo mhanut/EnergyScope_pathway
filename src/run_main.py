@@ -47,9 +47,9 @@ graph = True # True to plot graphs for deterministic run
 graph_comp = False  # True to plot comparative graphs between two deterministic
 # runs
 
-case_study = 'scenario_clever_cost_EV'  # Give here the name of the case study for
+case_study = 'scenario_clever_cost_EV_NG_FUELCELL'  # Give here the name of the case study for
 # deterministic run
-expl_text = 'clever_cost_EV'  # Give here explanation text to describe the
+expl_text = 'clever_cost_EV_NG_FUELCELL'  # Give here explanation text to describe the
 # case study
 
 # %% Join the .dat and .mod files depending on the type of model (MO or TD).
