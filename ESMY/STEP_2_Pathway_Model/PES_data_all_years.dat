@@ -121,8 +121,8 @@ param	limit_freight_changes	:=	0.5	;#50% of refurbishment per period (5years)
 																														
 param c_grid_extra :=	3.68E+02	;	# cost to reinforce the grid due to intermittent renewable energy penetration. See 2.2.2																											
 param c_grid_extra2 :=	3.68E+02	;	# cost to reinforce the grid due to intermittent renewable energy penetration. See 2.2.2
-param c_grid_extra_NG :=	3.68E+02	;	# cost to reinforce the grid due to intermittent renewable energy penetration. See 2.2.2
-param c_grid_extra_FUELCELL :=	3.68E+02	;	# cost to reinforce the grid due to intermittent renewable energy penetration. See 2.2.2
+param c_grid_extra_NG :=	0	;	# cost to reinforce the grid due to intermittent renewable energy penetration. See 2.2.2
+param c_grid_extra_FUELCELL :=	0	;	# cost to reinforce the grid due to intermittent renewable energy penetration. See 2.2.2
 
 param power_density_pv :=	0.2367	;																												
 param power_density_solar_thermal :=	0.2857	;																																																									
