@@ -394,12 +394,12 @@ F [y,"GRID2"] >= 1 + (c_grid_extra2 / c_inv[y,"GRID2"]) * (
 #Contrainte pour voiture ng
 subject to extra_grid_NG {y in YEARS_WND diff YEAR_ONE}:
 F [y,"GRID_NG"] >= 1 + (c_grid_extra_NG / c_inv[y,"GRID_NG"]) * (
-		(F [y, "CAR_NG"])- (f_min [y,"CAR_NG"]));
+		(F [y, "CAR_NG"]+ F [y, "TRUCK_NG"])- (f_min [y,"CAR_NG"]- f_min [y,"TRUCK_NG"]));
 
 #Contrainte pour voiture fuel cell
 subject to extra_grid_FUELCELL {y in YEARS_WND diff YEAR_ONE}:
 F [y,"GRID_FUELCELL"] >= 1 + (c_grid_extra_FUELCELL / c_inv[y,"GRID_FUELCELL"]) * (
-		(F [y, "CAR_FUEL_CELL"])- (f_min [y,"CAR_FUEL_CELL"]));
+		(F [y, "CAR_FUEL_CELL"] + F [y, "TRUCK_FUEL_CELL"])- (f_min [y,"CAR_FUEL_CELL"]- f_min [y,"TRUCK_FUEL_CELL"]));
 
 
 # [Eq. 22] DHN: assigning a cost to the network
