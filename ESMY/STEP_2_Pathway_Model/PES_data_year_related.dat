@@ -98,16 +98,6 @@ YEAR_2045	250
 YEAR_2050	250																																																																																																																
 ;
 
-param f_max_EV :=
-YEAR_2015  9.74
-YEAR_2020  9.74
-YEAR_2025  9.74
-YEAR_2030  9.74
-YEAR_2035  9.74
-YEAR_2040  9.74
-YEAR_2045  9.74
-YEAR_2050  9.74
-;
 
 
 #param end_uses_demand_year {YEARS, END_USES_INPUT, SECTORS}

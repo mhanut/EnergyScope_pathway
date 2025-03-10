@@ -42,14 +42,14 @@ CO2_neutrality_2050 = True  # True if setting the GWP of 2050 to carbon-
 CO2_neutrality_2050_val = 3406.92  # Value equivalent to CO2-neutrality in 2050
 # [ktCO2,eq]
 
-run_opti = True  # True to run optimisation
-graph = True # True to plot graphs for deterministic run
-graph_comp = False  # True to plot comparative graphs between two deterministic
+run_opti = False  # True to run optimisation
+graph = False # True to plot graphs for deterministic run
+graph_comp = True  # True to plot comparative graphs between two deterministic
 # runs
 
-case_study = 'scenario_clever_lithium'  # Give here the name of the case study for
+case_study = 'scenario_clever'  # Give here the name of the case study for
 # deterministic run
-expl_text = 'clever_lithium'  # Give here explanation text to describe the
+expl_text = 'clever'  # Give here explanation text to describe the
 # case study
 
 # %% Join the .dat and .mod files depending on the type of model (MO or TD).
@@ -219,7 +219,7 @@ if __name__ == '__main__':
         output_file_2 = os.path.join(output_folder_2, '_Results.pkl')
 
         # Reference case: TD-Perfect foresight
-        case_study_1 = 'test_test'
+        case_study_1 = 'scenario_clever_lithium'
         output_folder_1 = os.path.join(pth_output_all, case_study_1)
         output_file_1 = os.path.join(output_folder_1, '_Results.pkl')
 
@@ -227,9 +227,9 @@ if __name__ == '__main__':
 
         # ampl_graph.graph_comparison(output_files,'C_inv_phase_tech')
         # ampl_graph.graph_comparison(output_files,'C_op_phase')
-        ampl_graph.graph_comparison(output_files,'Resources')
+        #ampl_graph.graph_comparison(output_files,'Resources')
         # ampl_graph.graph_comparison(output_files,'Cost_return')
-        # ampl_graph.graph_comparison(output_files,'Total_trans_cost')
+        ampl_graph.graph_comparison(output_files,'Total_trans_cost')
         # ampl_graph.graph_comparison(output_files,'Total_system_cost')
         # ampl_graph.graph_comparison(output_files,'Tech_cap')
         # ampl_graph.graph_comparison(output_files,'Layer')
