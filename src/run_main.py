@@ -47,9 +47,9 @@ graph = True # True to plot graphs for deterministic run
 graph_comp = False  # True to plot comparative graphs between two deterministic
 # runs
 
-case_study = 'scenario_clever'  # Give here the name of the case study for
+case_study = 'scenario_clever_lithium'  # Give here the name of the case study for
 # deterministic run
-expl_text = 'clever'  # Give here explanation text to describe the
+expl_text = 'clever_lithium'  # Give here explanation text to describe the
 # case study
 
 # %% Join the .dat and .mod files depending on the type of model (MO or TD).
@@ -101,6 +101,7 @@ ampl_options = {'show_stats': 1,
                 'show_boundtol': 0,
                 'gurobi_options': gurobi_options_str,
                 '_log_input_only': False}
+
 
 ###############################################################################
 ''' main script '''

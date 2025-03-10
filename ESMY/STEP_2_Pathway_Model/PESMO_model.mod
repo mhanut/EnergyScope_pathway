@@ -143,7 +143,7 @@ param elec_max_import_capa  {YEARS} >=0;
 param solar_area	 {YEARS} >= 0; # Maximum land available for PV deployment [km2]
 param power_density_pv >=0 default 0;# Maximum power irradiance for PV.
 param power_density_solar_thermal >=0 default 0;# Maximum power irradiance for solar thermal.
-
+param f_max_EV {YEARS} >= 0 default 0; # maximum number of electric cars based on limit of lithium-ion batteries
 
 ##Additional parameter (not presented in the paper)
 param total_time := sum {t in PERIODS} (t_op [t]); # added just to simplify equations
@@ -388,6 +388,8 @@ subject to extra_dhn  {y in YEARS_WND diff YEAR_ONE}:
 	F [y, "DHN"] = sum {j in TECHNOLOGIES diff STORAGE_TECH: layers_in_out [y, j,"HEAT_LOW_T_DHN"] > 0} (layers_in_out [y, j,"HEAT_LOW_T_DHN"] * F [y, j]);
 
 
+subject to max_ev {y in YEARS_WND diff YEAR_ONE}:
+   F[y, "CAR_BEV"] + F[y, "CAR_PHEV"]/2 + F[y, "CAR_HEV"]/2 <= f_max_EV[y];
 
 
 

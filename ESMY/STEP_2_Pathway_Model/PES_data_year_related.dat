@@ -85,8 +85,8 @@ YEAR_2035	50.4	50.4
 YEAR_2040	50.4	50.4																																																																																																															
 YEAR_2045	50.4	50.4																																																																																																															
 YEAR_2050	50.4	50.4																																																																																																															
-;																																																																																																																	
-																																																																																																																	
+;
+
 param : solar_area :=																																																																																																																	
 YEAR_2015	250																																																																																																																
 YEAR_2020	250																																																																																																																
@@ -96,41 +96,52 @@ YEAR_2035	250
 YEAR_2040	250																																																																																																																
 YEAR_2045	250																																																																																																																
 YEAR_2050	250																																																																																																																
-;																																																																																																																	
+;
+
+param f_max_EV :=
+YEAR_2015  9.74
+YEAR_2020  9.74
+YEAR_2025  9.74
+YEAR_2030  9.74
+YEAR_2035  9.74
+YEAR_2040  9.74
+YEAR_2045  9.74
+YEAR_2050  9.74
+;
 
 
-																																																																																																																	
-#param end_uses_demand_year {YEARS, END_USES_INPUT, SECTORS}																																																																																																																	
+#param end_uses_demand_year {YEARS, END_USES_INPUT, SECTORS}
 param end_uses_demand_year :=
-["YEAR_2015",*,*]:	HOUSEHOLDS	SERVICES	INDUSTRY	TRANSPORTATION	:=
-ELECTRICITY	3116.1	4564.404	10460.87	0
+["YEAR_2015",*,*]: 	HOUSEHOLDS	SERVICES	INDUSTRY	TRANSPORTATION	:=
+ELECTRICITY	12464.4	12678.9	29888.2	0
 LIGHTING	6711.6	9891.3	9844.5	0
-HEAT_HIGH_T	0	0	21895.86	0
-HEAT_LOW_T_SH	23934.69	21228.146	5695.83	0
-HEAT_LOW_T_HW	9255.743	3125.056	1475.775	0
-MOBILITY_PASSENGER	0	0	0	26489.124
-MOBILITY_FREIGHT	0	0	0	22462.304
-NON_ENERGY	0	0	14817	0
+HEAT_HIGH_T	0	0	62559.6	0
+HEAT_LOW_T_SH	61371	31683.8	16273.8	0
+HEAT_LOW_T_HW	15687.7	7102.4	4216.5	0
+MOBILITY_PASSENGER	0	0	0	147161.8
+MOBILITY_FREIGHT	0	0	0	70194.7
+NON_ENERGY	0	0	51093.58993	0
 
-["YEAR_2020",*,*]:	HOUSEHOLDS	SERVICES	INDUSTRY	TRANSPORTATION	:=
-ELECTRICITY	3034.775	4015.692	9542.4	0
+["YEAR_2020",*,*]: 	HOUSEHOLDS	SERVICES	INDUSTRY	TRANSPORTATION	:=
+ELECTRICITY	12139.1	11154.7	27264	0
 LIGHTING	6536.5	8702.3	8980.1	0
-HEAT_HIGH_T	0	0	20794.83	0
-HEAT_LOW_T_SH	23310.144	18676.25	5409.425	0
-HEAT_LOW_T_HW	9014.256	2749.384	1401.54	0
-MOBILITY_PASSENGER	0	0	0	19746.504
-MOBILITY_FREIGHT	0	0	0	22139.584
-NON_ENERGY	0	0	14921	0
+HEAT_HIGH_T	0	0	59413.8	0
+HEAT_LOW_T_SH	59769.6	27875	15455.5	0
+HEAT_LOW_T_HW	15278.4	6248.6	4004.4	0
+MOBILITY_PASSENGER	0	0	0	109702.8
+MOBILITY_FREIGHT	0	0	0	69186.2
+NON_ENERGY	0	0	51450.5833	0
 
 ["YEAR_2025",*,*]:	HOUSEHOLDS	SERVICES	INDUSTRY	TRANSPORTATION	:=
-ELECTRICITY	2847.5	4367.232	10906.14	0
+ELECTRICITY	11390	12131.2	31160.4	0
 LIGHTING	6133.1	9531.7	10386.8	0
-HEAT_HIGH_T	0	0	22165.045	0
-HEAT_LOW_T_SH	23069.943	19462.026	5910.695	0
-HEAT_LOW_T_HW	8725.156	2805.572	1477.665	0
-MOBILITY_PASSENGER	0	0	0	22739.4
-MOBILITY_FREIGHT	0	0	0	22758.4
-NON_ENERGY	0	0	15022.261	0
+HEAT_HIGH_T	0	0	63328.7	0
+HEAT_LOW_T_SH	59153.7	29047.8	16887.7	0
+HEAT_LOW_T_HW	14788.4	6376.3	4221.9	0
+MOBILITY_PASSENGER	0	0	0	126330
+MOBILITY_FREIGHT	0	0	0	71120
+NON_ENERGY	0	0	51800.9	0
+
 
 ["YEAR_2030",*,*]:	HOUSEHOLDS	SERVICES	INDUSTRY	TRANSPORTATION	:=
 ELECTRICITY	2672.2	4242.384	15257.305	0
