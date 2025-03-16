@@ -42,9 +42,9 @@ CO2_neutrality_2050 = True  # True if setting the GWP of 2050 to carbon-
 CO2_neutrality_2050_val = 3406.92  # Value equivalent to CO2-neutrality in 2050
 # [ktCO2,eq]
 
-run_opti = False  # True to run optimisation
-graph = False # True to plot graphs for deterministic run
-graph_comp = True  # True to plot comparative graphs between two deterministic
+run_opti = True  # True to run optimisation
+graph = True # True to plot graphs for deterministic run
+graph_comp = False  # True to plot comparative graphs between two deterministic
 # runs
 
 case_study = 'scenario_clever'  # Give here the name of the case study for
