@@ -202,7 +202,7 @@ if __name__ == '__main__':
         # ampl_graph.graph_cost_return() # Salvage value
 
         #ampl_graph.graph_layer() # Prod-Cons graph per layer
-        ampl_graph.graph_tech_cap() # Installed capapcities per sector
+        #ampl_graph.graph_tech_cap() # Installed capapcities per sector
         # ampl_graph.graph_load_factor() # Load factor per sector
         # df_unused,_ = ampl_graph.graph_load_factor_scaled() # Scaled load factor
 
@@ -229,8 +229,8 @@ if __name__ == '__main__':
         #ampl_graph.graph_comparison(output_files,'Resources')
         # ampl_graph.graph_comparison(output_files,'Cost_return')
         # ampl_graph.graph_comparison(output_files,'Total_trans_cost')
-        ampl_graph.graph_comparison(output_files,'Total_system_cost')
-        # ampl_graph.graph_comparison(output_files,'Tech_cap')
+        #ampl_graph.graph_comparison(output_files,'Total_system_cost')
+        #ampl_graph.graph_comparison(output_files,'Tech_cap')
         # ampl_graph.graph_comparison(output_files,'Layer')
         # ampl_graph.graph_comparison(output_files,'GWP_per_sector')
         # ampl_graph.graph_comparison(output_files,'Load_factor')
