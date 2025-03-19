@@ -114,7 +114,7 @@ param diff_2015_phase :=
 2040_2045 27.5																														
 2045_2050 32.5; 																														
 																														
-param	limit_LT_renovation	:=	0.55    ;#33% of refurbishment per period (5years)
+param	limit_LT_renovation	:=	0.33    ;#33% of refurbishment per period (5years)
 param	limit_pass_mob_changes	:=	0.5	;#50% of refurbishment per period (5years)
 param	limit_freight_changes	:=	0.5	;#50% of refurbishment per period (5years)
 																														
