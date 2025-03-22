@@ -182,7 +182,7 @@ HEAT_LOW_T_SH	34228	9485	388.5	0
 HEAT_LOW_T_HW	5292	1592	97.11	0
 MOBILITY_PASSENGER	0	0	0	110660
 MOBILITY_FREIGHT	0	0	0	70000
-NON_ENERGY	0	0	15953.509	0
+NON_ENERGY	0	0	39600	0
 ;
 
 param:	share_mobility_public_min	share_freight_train_min	share_freight_boat_min	share_freight_road_min	share_heat_dhn_min	share_mobility_public_max	share_freight_train_max	share_freight_boat_max	share_freight_road_max	share_heat_dhn_max	:=
