@@ -265,9 +265,54 @@ class AmplGraph:
             plt.close()
         
         return df_to_plot
-    
-    
-    #%% GWP per different sectors
+
+    def graph_total_primary_demand(self, ampl_collector=None, plot=True):
+        pio.renderers.default = 'browser'
+
+        if ampl_collector is None:
+            ampl_collector = self.ampl_collector
+
+        results = ampl_collector['Resources'].copy()
+        df_to_plot = pd.DataFrame(index=results.index, columns=['Total_Res'])
+
+        for y in results.index.get_level_values(0).unique():
+            temp = results.loc[results.index.get_level_values('Years') == y, 'Res']
+            temp = self._remove_low_values(temp, threshold=0)
+            df_to_plot.loc[y, 'Total_Res'] = temp.sum()
+
+        df_to_plot.dropna(how='all', inplace=True)
+        df_to_plot.reset_index(inplace=True)
+        df_to_plot['Years'] = df_to_plot['Years'].str.replace('YEAR_', '').astype(int)
+        df_to_plot['Total_Res'] /= 1000  # Conversion en TWh
+
+        # Filtrer les années par pas de 5 ans
+        df_to_plot = df_to_plot[df_to_plot['Years'].isin(self.x_axis)]
+
+        if plot:
+            fig = px.line(df_to_plot, x='Years', y='Total_Res', markers=True,
+                          title=self.case_study + ' - Total Primary Resource Demand [TWh]',
+                          labels={'Total_Res': 'Total Resources (TWh)', 'Years': 'Year'},
+                          line_shape='linear')
+            fig.update_traces(line=dict(color='black'))
+            fig.update_xaxes(categoryorder='array', categoryarray=sorted(df_to_plot['Years'].unique()))
+
+            pio.show(fig)
+
+            # Sauvegarde des fichiers
+            if not os.path.exists(Path(self.outdir + "_Raw/")):
+                Path(self.outdir + "_Raw").mkdir(parents=True, exist_ok=True)
+            fig.write_html(self.outdir + "_Raw/Total_Resources.html")
+
+            title = "<b>Total Primary Resource Demand</b><br>[TWh]"
+            yvals = sorted([0, int(min(round(df_to_plot['Total_Res']))),
+                            int(max(round(df_to_plot['Total_Res'])))])
+
+            self.custom_fig(fig, title, yvals)
+            fig.write_image(self.outdir + "Total_Resources.pdf", width=1200, height=550)
+
+            plt.close()
+
+        return df_to_plot
     
     '''
     Graph_gwp_per_sector to plot the GWP attributed to the different sectors

@@ -195,12 +195,13 @@ if __name__ == '__main__':
 
         output_file = pth_output_all + '/' + case_study + '/_Results.pkl'
         ampl_graph = AmplGraph(output_file, ampl_0, case_study)
-        ampl_graph.graph_resource()  # Primary energy mix
-        ampl_graph.graph_cost()  # Total annual system cost
+        #ampl_graph.graph_resource()  # Primary energy mix
+        #ampl_graph.graph_cost()  # Total annual system cost
         # ampl_graph.graph_gwp_per_sector() # GWP per energy sector
         # ampl_graph.graph_cost_inv_phase_tech() # Cumulative investment costs
         # ampl_graph.graph_cost_op_phase() # Cumulative operational costs
         # ampl_graph.graph_cost_return() # Salvage value
+        ampl_graph.graph_total_primary_demand()
 
         #ampl_graph.graph_layer() # Prod-Cons graph per layer
         #ampl_graph.graph_tech_cap() # Installed capapcities per sector
@@ -212,29 +213,30 @@ if __name__ == '__main__':
     # case_study_1: the reference case study
     # Graphs present the absolute difference: case_study - case_study_1
     if graph_comp:
-        case_study = case_study
+        case_study = 'scenario_clever'
         output_file = pth_output_all + '/' + case_study + '/_Results.pkl'
         ampl_graph = AmplGraph(output_file, ampl_0, case_study)
         output_folder_2 = os.path.join(pth_output_all, case_study)
         output_file_2 = os.path.join(output_folder_2, '_Results.pkl')
 
         # Reference case: TD-Perfect foresight
-        case_study_1 = 'scenario_clever_lithium'
+        case_study_1 = 'scenario_no_reduction'
         output_folder_1 = os.path.join(pth_output_all, case_study_1)
         output_file_1 = os.path.join(output_folder_1, '_Results.pkl')
 
         output_files = [output_file_1, output_file_2]
 
-        # ampl_graph.graph_comparison(output_files,'C_inv_phase_tech')
-        # ampl_graph.graph_comparison(output_files,'C_op_phase')
+        #ampl_graph.graph_comparison(output_files,'C_inv_phase_tech')
+        #ampl_graph.graph_comparison(output_files,'C_op_phase')
         #ampl_graph.graph_comparison(output_files,'Resources')
         # ampl_graph.graph_comparison(output_files,'Cost_return')
-        ampl_graph.graph_comparison(output_files,'Total_trans_cost')
+        #ampl_graph.graph_comparison(output_files,'Total_trans_cost')
         # ampl_graph.graph_comparison(output_files,'Total_system_cost')
         # ampl_graph.graph_comparison(output_files,'Tech_cap')
         # ampl_graph.graph_comparison(output_files,'Layer')
         # ampl_graph.graph_comparison(output_files,'GWP_per_sector')
         # ampl_graph.graph_comparison(output_files,'Load_factor')
+
 
     ###############################################################################
     ''' main script ends here '''
