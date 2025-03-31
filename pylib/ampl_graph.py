@@ -324,6 +324,57 @@ class AmplGraph:
 
         return df_to_plot
 
+    def graph_electricity_demand(self, ampl_collector=None, plot=True):
+        pio.renderers.default = 'browser'
+        if ampl_collector is None:
+            ampl_collector = self.ampl_collector
+        year_balance_full = ampl_collector['Year_balance'].copy()
+        year_balance_full.dropna(how='all', inplace=True)
+        res_tech = self.ampl_obj.sets['RESOURCES']
+        year_balance = year_balance_full.loc[
+            ~year_balance_full.index.get_level_values('Elements').isin(res_tech)
+        ]
+        year_balance_pos = year_balance[year_balance > 0]
+        total_prod = year_balance_pos.groupby(['Years']).sum()
+        if 'ELECTRICITY' not in total_prod.columns:
+            # Si jamais 'ELECTRICITY' n'existe pas, on peut soit lever une alerte, soit renvoyer un DF vide
+            print("Avertissement : 'ELECTRICITY' n'apparaît pas dans year_balance.")
+            return pd.DataFrame()
+        electricity_df = total_prod[['ELECTRICITY']].copy()
+        #    On redonne un nom plus clair
+        electricity_df.rename(columns={'ELECTRICITY': 'Electricity_Res'}, inplace=True)
+        electricity_df.reset_index(inplace=True)
+        electricity_df['Electricity_Res'] /= 1000.0
+        electricity_df['Years'] = electricity_df['Years'] \
+            .str.replace('YEAR_', '') \
+            .astype(int)
+        electricity_df = electricity_df[electricity_df['Years'].isin(self.x_axis)]
+        if plot:
+            fig = px.line(
+                electricity_df,
+                x='Years',
+                y='Electricity_Res',
+                markers=True,
+                title=self.case_study + ' - Electricity Demand [TWh]',
+                labels={'Electricity_Res': 'Electricity (TWh)', 'Years': 'Year'},
+                line_shape='linear'
+            )
+            fig.update_traces(line=dict(color='black'))  # si vous souhaitez la même couleur noire
+            fig.update_xaxes(categoryorder='array', categoryarray=sorted(electricity_df['Years'].unique()))
+            pio.show(fig)
+            if not os.path.exists(Path(self.outdir + "_Raw/")):
+                Path(self.outdir + "_Raw").mkdir(parents=True, exist_ok=True)
+            fig.write_html(self.outdir + "_Raw/Electricity_Resources.html")
+            min_val = electricity_df['Electricity_Res'].min()
+            max_val = electricity_df['Electricity_Res'].max()
+            yvals = sorted([0, int(round(min_val)), int(round(max_val))])
+            title = "<b>Electricity Resource Demand</b><br>[TWh]"
+            self.custom_fig(fig, title, yvals)
+            fig.write_image(self.outdir + "Electricity_Resources.pdf", width=1200, height=550)
+            plt.close()
+
+        return electricity_df
+
     def graph_heat_high_t_demand(self, ampl_collector=None, plot=True):
         pio.renderers.default = 'browser'
         if ampl_collector is None:
@@ -1657,7 +1708,6 @@ class AmplGraph:
         df_unused = df_unused.loc[~df_unused['F'].isna()]
         return df_unused, df_to_plot_full
 
-    # %% Method to plot comparative graphs between 2 deterministic cases
     def graph_comparison(self, output_files, type_of_graph):
 
         category = self.category
@@ -1665,16 +1715,25 @@ class AmplGraph:
         result_0 = self.unpkl(self, pkl_file=output_files[0])  # Results for PF-TD
         result_1 = self.unpkl(self, pkl_file=output_files[1])
 
-        switcher = {'C_inv_phase_tech': self.graph_cost_inv_phase_tech,
-                    'C_op_phase': self.graph_cost_op_phase,
-                    'Tech_cap': self.graph_tech_cap,
-                    'Cost_return': self.graph_cost_return,
-                    'Resources': self.graph_resource,
-                    'Layer': self.graph_layer,
-                    'Load_factor': self.graph_load_factor_scaled,
-                    'GWP_per_sector': self.graph_gwp_per_sector,
-                    'Total_Res': self.graph_total_primary_demand,
-                    'Total_system_cost': self.graph_total_cost_per_year}
+        switcher = {
+            'C_inv_phase_tech': self.graph_cost_inv_phase_tech,
+            'C_op_phase': self.graph_cost_op_phase,
+            'Tech_cap': self.graph_tech_cap,
+            'Cost_return': self.graph_cost_return,
+            'Resources': self.graph_resource,
+            'Layer': self.graph_layer,
+            'Load_factor': self.graph_load_factor_scaled,
+            'GWP_per_sector': self.graph_gwp_per_sector,
+            'Total_Res': self.graph_total_primary_demand,
+            'Total_system_cost': self.graph_total_cost_per_year,
+            'Electricity_Demand': self.graph_electricity_demand,
+            'Heat_High_T_Demand': self.graph_heat_high_t_demand,
+            'Heat_Low_T_SH_Demand': self.graph_heat_low_t_sh_demand,
+            'Heat_Low_T_DHN_Demand': self.graph_heat_low_t_dhn_demand,
+            'Mobility_Passenger_Demand': self.graph_mobility_passenger_demand,
+            'Mobility_Freight_Demand': self.graph_mobility_freight_demand,
+            'Non_Energy_Demand': self.graph_non_energy_demand
+        }
 
         if type_of_graph not in ['Total_trans_cost']:
             grph_mth = switcher.get(str(type_of_graph))
@@ -1684,7 +1743,6 @@ class AmplGraph:
             else:
                 result_0 = grph_mth(ampl_collector=result_0, plot=False)
                 result_1 = grph_mth(ampl_collector=result_1, plot=False)
-
         else:
             result_0 = self._compute_transition_cost(ampl_collector=result_0)
             result_1 = self._compute_transition_cost(ampl_collector=result_1)
@@ -1716,46 +1774,94 @@ class AmplGraph:
                     df_to_plot[k] = pd.DataFrame(result_1[k][k].sub(result_0[k][k], fill_value=0))
                     df_to_plot[k]['Type'] = result_0[k]['Type']
                     df_to_plot[k].loc[df_to_plot[k]['Type'].isnull(), 'Type'] = \
-                    result_1[k].loc[df_to_plot[k]['Type'].isnull()]['Type']
+                        result_1[k].loc[df_to_plot[k]['Type'].isnull()]['Type']
                 else:
                     result_0_k = result_0[k].set_index(['Years', 'Technologies', 'var'])
                     result_1_k = result_1[k].set_index(['Years', 'Technologies', 'var'])
                     df_to_plot[k] = pd.DataFrame(result_1_k.sub(result_0_k, fill_value=0))
                     df_to_plot[k].reset_index(inplace=True)
         elif type_of_graph in ['Total_Res']:
-            # On suppose que result_0 et result_1 ont une colonne 'Years'
-            # et 'Total_Res' (numérique).
             result_0 = result_0.set_index('Years')
             result_1 = result_1.set_index('Years')
-            # Au cas où, on convertit en float
             result_0['Total_Res'] = pd.to_numeric(result_0['Total_Res'], errors='coerce')
             result_1['Total_Res'] = pd.to_numeric(result_1['Total_Res'], errors='coerce')
-            # On fait la différence seulement sur la colonne numeric
             df_to_plot = result_1[['Total_Res']].sub(result_0[['Total_Res']], fill_value=0)
             df_to_plot.reset_index(inplace=True)
+        elif type_of_graph in ['Electricity_Demand']:
+            result_0 = result_0.set_index('Years')
+            result_1 = result_1.set_index('Years')
+            result_0['Electricity_Res'] = pd.to_numeric(result_0['Electricity_Res'], errors='coerce')
+            result_1['Electricity_Res'] = pd.to_numeric(result_1['Electricity_Res'], errors='coerce')
+            df_to_plot = result_1[['Electricity_Res']].sub(result_0[['Electricity_Res']], fill_value=0)
+            df_to_plot.reset_index(inplace=True)
+        elif type_of_graph in ['Heat_High_T_Demand']:
+            result_0 = result_0.set_index('Years')
+            result_1 = result_1.set_index('Years')
+            result_0['HeatHighT_Res'] = pd.to_numeric(result_0['HeatHighT_Res'], errors='coerce')
+            result_1['HeatHighT_Res'] = pd.to_numeric(result_1['HeatHighT_Res'], errors='coerce')
+            df_to_plot = result_1[['HeatHighT_Res']].sub(result_0[['HeatHighT_Res']], fill_value=0)
+            df_to_plot.reset_index(inplace=True)
+        elif type_of_graph in ['Heat_Low_T_SH_Demand']:
+            result_0 = result_0.set_index('Years')
+            result_1 = result_1.set_index('Years')
+            result_0['HeatLowT_SH_Res'] = pd.to_numeric(result_0['HeatLowT_SH_Res'], errors='coerce')
+            result_1['HeatLowT_SH_Res'] = pd.to_numeric(result_1['HeatLowT_SH_Res'], errors='coerce')
+            df_to_plot = result_1[['HeatLowT_SH_Res']].sub(result_0[['HeatLowT_SH_Res']], fill_value=0)
+            df_to_plot.reset_index(inplace=True)
+        elif type_of_graph in ['Heat_Low_T_DHN_Demand']:
+            result_0 = result_0.set_index('Years')
+            result_1 = result_1.set_index('Years')
+            result_0['HeatLowT_DHN_Res'] = pd.to_numeric(result_0['HeatLowT_DHN_Res'], errors='coerce')
+            result_1['HeatLowT_DHN_Res'] = pd.to_numeric(result_1['HeatLowT_DHN_Res'], errors='coerce')
+            df_to_plot = result_1[['HeatLowT_DHN_Res']].sub(result_0[['HeatLowT_DHN_Res']], fill_value=0)
+            df_to_plot.reset_index(inplace=True)
+        elif type_of_graph in ['Mobility_Passenger_Demand']:
+            result_0 = result_0.set_index('Years')
+            result_1 = result_1.set_index('Years')
+            result_0['Mobility_Passenger_Res'] = pd.to_numeric(result_0['Mobility_Passenger_Res'], errors='coerce')
+            result_1['Mobility_Passenger_Res'] = pd.to_numeric(result_1['Mobility_Passenger_Res'], errors='coerce')
+            df_to_plot = result_1[['Mobility_Passenger_Res']].sub(result_0[['Mobility_Passenger_Res']], fill_value=0)
+            df_to_plot.reset_index(inplace=True)
+        elif type_of_graph in ['Mobility_Freight_Demand']:
+            result_0 = result_0.set_index('Years')
+            result_1 = result_1.set_index('Years')
+            result_0['Mobility_Freight_Res'] = pd.to_numeric(result_0['Mobility_Freight_Res'], errors='coerce')
+            result_1['Mobility_Freight_Res'] = pd.to_numeric(result_1['Mobility_Freight_Res'], errors='coerce')
+            df_to_plot = result_1[['Mobility_Freight_Res']].sub(result_0[['Mobility_Freight_Res']], fill_value=0)
+            df_to_plot.reset_index(inplace=True)
+        elif type_of_graph in ['Non_Energy_Demand']:
+            result_0 = result_0.set_index('Years')
+            result_1 = result_1.set_index('Years')
+            result_0['Non_Energy_Res'] = pd.to_numeric(result_0['Non_Energy_Res'], errors='coerce')
+            result_1['Non_Energy_Res'] = pd.to_numeric(result_1['Non_Energy_Res'], errors='coerce')
+            df_to_plot = result_1[['Non_Energy_Res']].sub(result_0[['Non_Energy_Res']], fill_value=0)
+            df_to_plot.reset_index(inplace=True)
 
-        if type_of_graph not in ['Layer', 'Load_factor', 'Total_Res']:
+        if type_of_graph not in [
+            'Layer', 'Load_factor', 'Total_Res', 'Electricity_Demand', 'Heat_High_T_Demand',
+            'Heat_Low_T_SH_Demand', 'Heat_Low_T_DHN_Demand', 'Mobility_Passenger_Demand',
+            'Mobility_Freight_Demand', 'Non_Energy_Demand'
+        ]:
             df_to_plot = result_1.sub(result_0, fill_value=0)
             df_to_plot.reset_index(inplace=True)
 
         if type_of_graph in ['C_op_phase', 'C_inv_phase_tech']:
-            fig = px.line(df_to_plot, x='Years', y='cumsum', color='Category',
-                          title='Comparison - {}'.format(type_of_graph),
-                          color_discrete_map=self.color_dict_full, markers=True)
+            fig = px.line(
+                df_to_plot, x='Years', y='cumsum', color='Category',
+                title='Comparison - {}'.format(type_of_graph),
+                color_discrete_map=self.color_dict_full, markers=True
+            )
             fig.update_xaxes(categoryorder='array', categoryarray=sorted(df_to_plot['Years'].unique()))
             pio.show(fig)
-
             if type_of_graph == 'C_op_phase':
                 title = "<b>Cumulative opex difference versus REF</b><br>[b€<sub>2015</sub>]"
             else:
                 title = "<b>Cumulative capex difference versus REF</b><br>[b€<sub>2015</sub>]"
-            yvals = [round(min(df_to_plot['cumsum']), 1), 0,
-                     round(max(df_to_plot['cumsum']), 1)]
-
+            yvals = [round(min(df_to_plot['cumsum']), 1), 0, round(max(df_to_plot['cumsum']), 1)]
             self.custom_fig(fig, title, yvals, neg_value=True)
             fig.write_image(self.outdir + "{}_diff_PF.pdf".format(type_of_graph), width=1200, height=550)
-
             plt.close()
+
         elif type_of_graph in ['Tech_cap']:
             dict_tech = self._group_tech_per_eud()
             years = df_to_plot['Years'].unique()
@@ -1770,19 +1876,17 @@ class AmplGraph:
                 df_to_plot_s.reset_index(inplace=True)
                 df_to_plot_s.sort_values(by=['Years'], inplace=True)
                 df_to_plot_s.fillna(0, inplace=True)
-
-                fig = px.line(df_to_plot_s, x='Years', y='F', color='Technologies',
-                              title='Comparison - {} - {}'.format(type_of_graph, sector),
-                              color_discrete_map=self.color_dict_full, markers=True)
+                fig = px.line(
+                    df_to_plot_s, x='Years', y='F', color='Technologies',
+                    title='Comparison - {} - {}'.format(type_of_graph, sector),
+                    color_discrete_map=self.color_dict_full, markers=True
+                )
                 fig.update_xaxes(categoryorder='array', categoryarray=sorted(df_to_plot_s['Years'].unique()))
                 pio.show(fig)
-
-                title = "<b>Installed capacities difference versus REF - {}</b><br>[{}]".format(sector,
-                                                                                                self.dict_tech_cap_unit[
-                                                                                                    sector])
-                yvals = [round(min(df_to_plot_s['F']), 1), 0,
-                         round(max(df_to_plot_s['F']), 1)]
-
+                title = "<b>Installed capacities difference versus REF - {}</b><br>[{}]".format(
+                    sector, self.dict_tech_cap_unit[sector]
+                )
+                yvals = [round(min(df_to_plot_s['F']), 1), 0, round(max(df_to_plot_s['F']), 1)]
                 self.custom_fig(fig, title, yvals, neg_value=True)
                 if not os.path.exists(Path(self.outdir + "Tech_Cap/Diff_PF/")):
                     Path(self.outdir + "Tech_Cap/Diff_PF").mkdir(parents=True, exist_ok=True)
@@ -1797,20 +1901,17 @@ class AmplGraph:
                 df_to_plot_layer.loc[df_to_plot_layer.index.get_level_values('Type') == 'Consumption', :] *= -1
                 df_to_plot_layer.reset_index(inplace=True)
                 years = df_to_plot_layer['Years'].unique()
-
-                fig = px.line(df_to_plot_layer, x='Years', y=k, color='Elements', facet_row='Type',
-                              title='Comparison - {} - {}'.format(type_of_graph, k),
-                              color_discrete_map=self.color_dict_full, markers=True,
-                              category_orders={'Years': sorted(years),
-                                               'Type': ['Production', 'Consumption']})
+                fig = px.line(
+                    df_to_plot_layer, x='Years', y=k, color='Elements', facet_row='Type',
+                    title='Comparison - {} - {}'.format(type_of_graph, k),
+                    color_discrete_map=self.color_dict_full, markers=True,
+                    category_orders={'Years': sorted(years), 'Type': ['Production', 'Consumption']}
+                )
                 fig.update_yaxes(matches=None)
                 fig.update_xaxes(categoryorder='array', categoryarray=sorted(years))
                 pio.show(fig)
-
                 title = "<b>Layer balance difference versus REF - {}</b><br>[{}]".format(k, self.dict_layer_unit[k])
-                yvals = [round(min(df_to_plot_layer[k]), 1), 0,
-                         round(max(df_to_plot_layer[k]), 1)]
-
+                yvals = [round(min(df_to_plot_layer[k]), 1), 0, round(max(df_to_plot_layer[k]), 1)]
                 self.custom_fig(fig, title, yvals, neg_value=True)
                 if not os.path.exists(Path(self.outdir + "Layers/Diff_PF/")):
                     Path(self.outdir + "Layers/Diff_PF").mkdir(parents=True, exist_ok=True)
@@ -1820,30 +1921,30 @@ class AmplGraph:
         elif type_of_graph in ['GWP_per_sector']:
             df_to_plot.reset_index(inplace=True)
             df_to_plot.sort_values(by=['Years'], inplace=True)
-            fig = px.line(df_to_plot, x='Years', y='GWP_EUD', color='Layers',
-                          title='Comparison - {}'.format(type_of_graph),
-                          color_discrete_map=self.color_dict_full, markers=True)
+            fig = px.line(
+                df_to_plot, x='Years', y='GWP_EUD', color='Layers',
+                title='Comparison - {}'.format(type_of_graph),
+                color_discrete_map=self.color_dict_full, markers=True
+            )
             fig.update_xaxes(categoryorder='array', categoryarray=sorted(df_to_plot['Years'].unique()))
             pio.show(fig)
-
             title = "<b>GWP per sector difference versus REF</b><br>[MtCO2/y]"
-            yvals = [round(min(df_to_plot['GWP_EUD']), 1), 0,
-                     round(max(df_to_plot['GWP_EUD']), 1)]
-
+            yvals = [round(min(df_to_plot['GWP_EUD']), 1), 0, round(max(df_to_plot['GWP_EUD']), 1)]
             self.custom_fig(fig, title, yvals, neg_value=True)
-
             fig.write_image(self.outdir + "GWP_per_sector_Diff_PF.pdf", width=1200, height=550)
             plt.close()
 
-
         elif type_of_graph in ['Load_factor']:
             for sector in df_to_plot.keys():
-                fig = px.bar(df_to_plot[sector], x='Technologies', y='val', color='Years',
-                             title=self.case_study + ' - ' + sector + ' - Scaled load factor versus REF',
-                             facet_row='var',
-                             color_discrete_map=self.color_dict_full)
-                fig.update_xaxes(categoryorder='array',
-                                 categoryarray=sorted(df_to_plot[sector]['Technologies'].unique()))
+                fig = px.bar(
+                    df_to_plot[sector], x='Technologies', y='val', color='Years',
+                    title=self.case_study + ' - ' + sector + ' - Scaled load factor versus REF',
+                    facet_row='var', color_discrete_map=self.color_dict_full
+                )
+                fig.update_xaxes(
+                    categoryorder='array',
+                    categoryarray=sorted(df_to_plot[sector]['Technologies'].unique())
+                )
                 fig.update_layout(barmode='group', xaxis_tickangle=-45)
                 fig.update_yaxes(matches=None)
                 if len(df_to_plot[sector].index.get_level_values(0).unique()) >= 1:
@@ -1855,7 +1956,6 @@ class AmplGraph:
                 plt.close()
 
         elif type_of_graph in ['Resources']:
-
             re_share_elec = self.re_share_elec
             res = df_to_plot['Resources'].unique()
             years = df_to_plot['Years'].unique()
@@ -1865,34 +1965,28 @@ class AmplGraph:
             df_to_plot = pd.concat([df_temp, df_to_plot])
             df_to_plot = df_to_plot.loc[~df_to_plot.index.duplicated(keep='last')]
             df_to_plot.reset_index(inplace=True)
-
             df_to_plot.sort_values(by=['Years'], inplace=True)
-
-            fig = px.line(df_to_plot, x='Years', y='Res', color='Resources',
-                          title='Comparison - {}'.format(type_of_graph),
-                          color_discrete_map=self.color_dict_full, markers=True)
+            fig = px.line(
+                df_to_plot, x='Years', y='Res', color='Resources',
+                title='Comparison - {}'.format(type_of_graph),
+                color_discrete_map=self.color_dict_full, markers=True
+            )
             fig.update_xaxes(categoryorder='array', categoryarray=sorted(df_to_plot['Years'].unique()))
             pio.show(fig)
             title = "<b>Primary energy difference versus REF</b><br>[TWh]"
-            yvals = [round(min(df_to_plot['Res']), 1), 0,
-                     round(max(df_to_plot['Res']), 1)]
-
+            yvals = [round(min(df_to_plot['Res']), 1), 0, round(max(df_to_plot['Res']), 1)]
             self.custom_fig(fig, title, yvals, neg_value=True)
             fig.write_image(self.outdir + "Primary_res_diff_PF.pdf", width=1200, height=550)
             plt.close()
-
             df_to_plot['Category'] = df_to_plot['Resources']
-
-            # df_to_plot.loc[df_to_plot['Resources'].
-            #                isin(['ELECTRICITY']),'Category'] = 'NRE_FUELS'
             df_to_plot = df_to_plot.replace({"Category": category})
             for i, y in enumerate(df_to_plot['Years'].unique()):
-                diff_elec = \
-                df_to_plot.loc[((df_to_plot['Years'] == y) & (df_to_plot['Resources'] == 'ELECTRICITY')), 'Res'].values[
-                    0]
+                diff_elec = df_to_plot.loc[
+                    ((df_to_plot['Years'] == y) & (df_to_plot['Resources'] == 'ELECTRICITY')), 'Res'
+                ].values[0]
                 df_to_plot.loc[
-                    ((df_to_plot['Years'] == y) & (df_to_plot['Resources'] == 'ELECTRICITY')), 'Res'] = diff_elec * (
-                            1 - re_share_elec[i])
+                    ((df_to_plot['Years'] == y) & (df_to_plot['Resources'] == 'ELECTRICITY')), 'Res'
+                ] = diff_elec * (1 - re_share_elec[i])
                 temp_re = pd.DataFrame({
                     'Years': y,
                     'Resources': 'ELECTRICITY',
@@ -1900,101 +1994,177 @@ class AmplGraph:
                     'Category': 'RE_FUELS'
                 }, index=[0])
                 df_to_plot = pd.concat([df_to_plot, temp_re])
-
-            df_to_plot.loc[df_to_plot['Resources'].
-                               isin(['WOOD', 'RES_WIND', 'RES_SOLAR', 'WET_BIOMASS']), 'Category'] = 'LOCAL_RE'
-            df_to_plot.loc[df_to_plot['Resources'].
-                               isin(['URANIUM']), 'Category'] = 'URANIUM'
-            # df_to_plot = df_to_plot.replace({"Category": category})
-
+            df_to_plot.loc[
+                df_to_plot['Resources'].isin(['WOOD', 'RES_WIND', 'RES_SOLAR', 'WET_BIOMASS']), 'Category'] = 'LOCAL_RE'
+            df_to_plot.loc[df_to_plot['Resources'].isin(['URANIUM']), 'Category'] = 'URANIUM'
             df_to_plot_category = df_to_plot.groupby(['Category', 'Years']).sum()
             df_to_plot_category.reset_index(inplace=True)
-            fig = px.line(df_to_plot_category, x='Years', y='Res', color='Category',
-                          title='Comparison - {}'.format(type_of_graph),
-                          color_discrete_map=self.color_dict_full, markers=True)
+            fig = px.line(
+                df_to_plot_category, x='Years', y='Res', color='Category',
+                title='Comparison - {}'.format(type_of_graph),
+                color_discrete_map=self.color_dict_full, markers=True
+            )
             fig.update_xaxes(categoryorder='array', categoryarray=sorted(df_to_plot['Years'].unique()))
             pio.show(fig)
             title = "<b>Primary energy difference versus REF</b><br>[TWh]"
-            yvals = [round(min(df_to_plot_category['Res']), 1), 0,
-                     round(max(df_to_plot_category['Res']), 1)]
-
+            yvals = [round(min(df_to_plot_category['Res']), 1), 0, round(max(df_to_plot_category['Res']), 1)]
             self.custom_fig(fig, title, yvals, neg_value=True)
             fig.write_image(self.outdir + "Primary_res_diff_PF_category.pdf", width=1200, height=550)
             plt.close()
+
         elif type_of_graph in ['Cost_return']:
-            fig = px.line(df_to_plot, x='Years', y='Cost_return', color='Category',
-                          title='Comparison - {}_1'.format(type_of_graph),
-                          color_discrete_map=self.color_dict_full, markers=True)
+            fig = px.line(
+                df_to_plot, x='Years', y='Cost_return', color='Category',
+                title='Comparison - {}_1'.format(type_of_graph),
+                color_discrete_map=self.color_dict_full, markers=True
+            )
             fig.update_xaxes(categoryorder='array', categoryarray=sorted(df_to_plot['Years'].unique()))
             pio.show(fig)
             title = "<b>Cost return difference versus REF</b><br>[b€<sub>2015</sub>]"
-            yvals = [min(round(df_to_plot['Cost_return'], 1)), 0,
-                     max(round(df_to_plot.loc[df_to_plot['Category'] == 'INFRASTRUCTURE']['Cost_return'], 1)),
-                     max(round(df_to_plot['Cost_return'], 1))]
-
+            yvals = [
+                min(round(df_to_plot['Cost_return'], 1)), 0,
+                max(round(df_to_plot.loc[df_to_plot['Category'] == 'INFRASTRUCTURE']['Cost_return'], 1)),
+                max(round(df_to_plot['Cost_return'], 1))
+            ]
             self.custom_fig(fig, title, yvals, neg_value=True)
             fig.write_image(self.outdir + "Cost_return_diff_PF.pdf", width=1200, height=550)
             plt.close()
+
         elif type_of_graph in ['Total_trans_cost']:
-            fig = px.line(df_to_plot, x='Years', y='Tot_trans_cost',
-                          title='Comparison - {}'.format(type_of_graph), markers=True)
+            fig = px.line(
+                df_to_plot, x='Years', y='Tot_trans_cost',
+                title='Comparison - {}'.format(type_of_graph), markers=True
+            )
             fig.update_xaxes(categoryorder='array', categoryarray=sorted(df_to_plot['Years'].unique()))
             pio.show(fig)
             title = "<b>Cumulative transition total cost difference versus REF</b><br>[b€<sub>2015</sub>]"
-            yvals = [min(round(df_to_plot['Tot_trans_cost'], 1)), 0,
-                     max(round(df_to_plot['Tot_trans_cost'], 1))]
+            yvals = [min(round(df_to_plot['Tot_trans_cost'], 1)), 0, max(round(df_to_plot['Tot_trans_cost'], 1))]
             self.custom_fig(fig, title, yvals, neg_value=True)
             fig.write_image(self.outdir + "Cum_total_cost_diff_REF.pdf", width=1200, height=550)
             plt.close()
 
         elif type_of_graph in ['Total_system_cost']:
-            fig = px.line(df_to_plot, x='Years', y='TotalCost',
-                          title='Comparison - {}'.format(type_of_graph), markers=True)
+            fig = px.line(
+                df_to_plot, x='Years', y='TotalCost',
+                title='Comparison - {}'.format(type_of_graph), markers=True
+            )
             fig.update_xaxes(categoryorder='array', categoryarray=sorted(df_to_plot['Years'].unique()))
             pio.show(fig)
             title = "<b>Annual system cost difference versus REF</b><br>[b€]"
-            yvals = sorted([min(round(df_to_plot['TotalCost'], 1)), 0,
-                            round(df_to_plot['TotalCost'].iloc[-1], 1),
-                            max(round(df_to_plot['TotalCost'], 1))])
+            yvals = sorted([
+                min(round(df_to_plot['TotalCost'], 1)), 0,
+                round(df_to_plot['TotalCost'].iloc[-1], 1),
+                max(round(df_to_plot['TotalCost'], 1))
+            ])
             self.custom_fig(fig, title, yvals, neg_value=True)
             fig.write_image(self.outdir + "Cum_system_cost_diff_REF.pdf", width=1200, height=550)
             plt.close()
+
         elif type_of_graph in ['Total_Res']:
-            # À ce stade, df_to_plot contient ['Years','Total_Res']
-            # pour la différence (scénario1 - REF).
-
             fig = px.line(
-                df_to_plot,
-                x='Years',
-                y='Total_Res',
-                title=f'Comparison - {type_of_graph}',
-                markers=True
+                df_to_plot, x='Years', y='Total_Res',
+                title=f'Comparison - {type_of_graph}', markers=True
             )
-            fig.update_xaxes(
-                categoryorder='array',
-                categoryarray=sorted(df_to_plot['Years'].unique())
-            )
+            fig.update_xaxes(categoryorder='array', categoryarray=sorted(df_to_plot['Years'].unique()))
             pio.show(fig)
-
-            # Personnalisez le titre et l'unité selon votre cas
             title = "<b>Total primary demand difference vs. REF</b><br>[TWh]"
-            yvals = [
-                round(min(df_to_plot['Total_Res']), 1),
-                0,
-                round(max(df_to_plot['Total_Res']), 1)
-            ]
-
-            # Votre custom_fig pour la mise en forme
+            yvals = [round(min(df_to_plot['Total_Res']), 1), 0, round(max(df_to_plot['Total_Res']), 1)]
             self.custom_fig(fig, title, yvals, neg_value=True)
-
-            # Sauvegarde en pdf
-            fig.write_image(
-                os.path.join(self.outdir, "Total_Res_diff_PF.pdf"),
-                width=1200,
-                height=550
-            )
+            fig.write_image(os.path.join(self.outdir, "Total_Res_diff_PF.pdf"), width=1200, height=550)
             plt.close()
 
+        elif type_of_graph in ['Electricity_Demand']:
+            fig = px.line(
+                df_to_plot, x='Years', y='Electricity_Res',
+                title=f'Comparison - {type_of_graph}', markers=True
+            )
+            fig.update_xaxes(categoryorder='array', categoryarray=sorted(df_to_plot['Years'].unique()))
+            pio.show(fig)
+            title = "<b>Electricity demand difference vs. REF</b><br>[TWh]"
+            yvals = [round(min(df_to_plot['Electricity_Res']), 1), 0, round(max(df_to_plot['Electricity_Res']), 1)]
+            self.custom_fig(fig, title, yvals, neg_value=True)
+            fig.write_image(os.path.join(self.outdir, "Electricity_Res_diff_PF.pdf"), width=1200, height=550)
+            plt.close()
+
+        elif type_of_graph in ['Heat_High_T_Demand']:
+            fig = px.line(
+                df_to_plot, x='Years', y='HeatHighT_Res',
+                title=f'Comparison - {type_of_graph}', markers=True
+            )
+            fig.update_xaxes(categoryorder='array', categoryarray=sorted(df_to_plot['Years'].unique()))
+            pio.show(fig)
+            title = "<b>Heat High T demand difference vs. REF</b><br>[TWh]"
+            yvals = [round(min(df_to_plot['HeatHighT_Res']), 1), 0, round(max(df_to_plot['HeatHighT_Res']), 1)]
+            self.custom_fig(fig, title, yvals, neg_value=True)
+            fig.write_image(os.path.join(self.outdir, "HeatHighT_Res_diff_PF.pdf"), width=1200, height=550)
+            plt.close()
+
+        elif type_of_graph in ['Heat_Low_T_SH_Demand']:
+            fig = px.line(
+                df_to_plot, x='Years', y='HeatLowT_SH_Res',
+                title=f'Comparison - {type_of_graph}', markers=True
+            )
+            fig.update_xaxes(categoryorder='array', categoryarray=sorted(df_to_plot['Years'].unique()))
+            pio.show(fig)
+            title = "<b>Heat Low T (Decen) demand difference vs. REF</b><br>[TWh]"
+            yvals = [round(min(df_to_plot['HeatLowT_SH_Res']), 1), 0, round(max(df_to_plot['HeatLowT_SH_Res']), 1)]
+            self.custom_fig(fig, title, yvals, neg_value=True)
+            fig.write_image(os.path.join(self.outdir, "HeatLowT_SH_Res_diff_PF.pdf"), width=1200, height=550)
+            plt.close()
+
+        elif type_of_graph in ['Heat_Low_T_DHN_Demand']:
+            fig = px.line(
+                df_to_plot, x='Years', y='HeatLowT_DHN_Res',
+                title=f'Comparison - {type_of_graph}', markers=True
+            )
+            fig.update_xaxes(categoryorder='array', categoryarray=sorted(df_to_plot['Years'].unique()))
+            pio.show(fig)
+            title = "<b>Heat Low T (DHN) demand difference vs. REF</b><br>[TWh]"
+            yvals = [round(min(df_to_plot['HeatLowT_DHN_Res']), 1), 0, round(max(df_to_plot['HeatLowT_DHN_Res']), 1)]
+            self.custom_fig(fig, title, yvals, neg_value=True)
+            fig.write_image(os.path.join(self.outdir, "HeatLowT_DHN_Res_diff_PF.pdf"), width=1200, height=550)
+            plt.close()
+
+        elif type_of_graph in ['Mobility_Passenger_Demand']:
+            fig = px.line(
+                df_to_plot, x='Years', y='Mobility_Passenger_Res',
+                title=f'Comparison - {type_of_graph}', markers=True
+            )
+            fig.update_xaxes(categoryorder='array', categoryarray=sorted(df_to_plot['Years'].unique()))
+            pio.show(fig)
+            title = "<b>Mobility Passenger demand difference vs. REF</b><br>[TWh]"
+            yvals = [round(min(df_to_plot['Mobility_Passenger_Res']), 1), 0,
+                     round(max(df_to_plot['Mobility_Passenger_Res']), 1)]
+            self.custom_fig(fig, title, yvals, neg_value=True)
+            fig.write_image(os.path.join(self.outdir, "Mobility_Passenger_Res_diff_PF.pdf"), width=1200, height=550)
+            plt.close()
+
+        elif type_of_graph in ['Mobility_Freight_Demand']:
+            fig = px.line(
+                df_to_plot, x='Years', y='Mobility_Freight_Res',
+                title=f'Comparison - {type_of_graph}', markers=True
+            )
+            fig.update_xaxes(categoryorder='array', categoryarray=sorted(df_to_plot['Years'].unique()))
+            pio.show(fig)
+            title = "<b>Mobility Freight demand difference vs. REF</b><br>[TWh]"
+            yvals = [round(min(df_to_plot['Mobility_Freight_Res']), 1), 0,
+                     round(max(df_to_plot['Mobility_Freight_Res']), 1)]
+            self.custom_fig(fig, title, yvals, neg_value=True)
+            fig.write_image(os.path.join(self.outdir, "Mobility_Freight_Res_diff_PF.pdf"), width=1200, height=550)
+            plt.close()
+
+        elif type_of_graph in ['Non_Energy_Demand']:
+            fig = px.line(
+                df_to_plot, x='Years', y='Non_Energy_Res',
+                title=f'Comparison - {type_of_graph}', markers=True
+            )
+            fig.update_xaxes(categoryorder='array', categoryarray=sorted(df_to_plot['Years'].unique()))
+            pio.show(fig)
+            title = "<b>Non-Energy demand difference vs. REF</b><br>[TWh]"
+            yvals = [round(min(df_to_plot['Non_Energy_Res']), 1), 0, round(max(df_to_plot['Non_Energy_Res']), 1)]
+            self.custom_fig(fig, title, yvals, neg_value=True)
+            fig.write_image(os.path.join(self.outdir, "Non_Energy_Res_diff_PF.pdf"), width=1200, height=550)
+        plt.close()
 
     # %% Compute  equivalent salvage value along the transition
     def _get_cost_return_for_each_year(self, ampl_collector=None):

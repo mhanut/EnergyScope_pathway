@@ -43,8 +43,8 @@ CO2_neutrality_2050_val = 3406.92  # Value equivalent to CO2-neutrality in 2050
 # [ktCO2,eq]
 
 run_opti = False  # True to run optimisation
-graph = True # True to plot graphs for deterministic run
-graph_comp = False  # True to plot comparative graphs between two deterministic
+graph = False # True to plot graphs for deterministic run
+graph_comp = True  # True to plot comparative graphs between two deterministic
 # runs
 
 case_study = 'scenario_clever'  # Give here the name of the case study for
@@ -202,12 +202,12 @@ if __name__ == '__main__':
         # ampl_graph.graph_cost_op_phase() # Cumulative operational costs
         # ampl_graph.graph_cost_return() # Salvage value
         #ampl_graph.graph_total_primary_demand()
-        #ampl_graph.graph_electricity_demand()
-        #ampl_graph.graph_heat_high_t_demand()
-        #ampl_graph.graph_heat_low_t_sh_demand()
-        #ampl_graph.graph_heat_low_t_dhn_demand()
-        #ampl_graph.graph_mobility_passenger_demand()
-        #ampl_graph.graph_mobility_freight_demand()
+        ampl_graph.graph_electricity_demand()
+        ampl_graph.graph_heat_high_t_demand()
+        ampl_graph.graph_heat_low_t_sh_demand()
+        ampl_graph.graph_heat_low_t_dhn_demand()
+        ampl_graph.graph_mobility_passenger_demand()
+        ampl_graph.graph_mobility_freight_demand()
         ampl_graph.graph_non_energy_demand()
 
         #ampl_graph.graph_layer() # Prod-Cons graph per layer
@@ -235,15 +235,22 @@ if __name__ == '__main__':
 
         #ampl_graph.graph_comparison(output_files,'C_inv_phase_tech')
         #ampl_graph.graph_comparison(output_files,'C_op_phase')
-        ampl_graph.graph_comparison(output_files,'Resources')
+        #ampl_graph.graph_comparison(output_files,'Resources')
         # ampl_graph.graph_comparison(output_files,'Cost_return')
-        ampl_graph.graph_comparison(output_files,'Total_trans_cost')
+        #ampl_graph.graph_comparison(output_files,'Total_trans_cost')
         # ampl_graph.graph_comparison(output_files,'Total_system_cost')
         # ampl_graph.graph_comparison(output_files,'Tech_cap')
         # ampl_graph.graph_comparison(output_files,'Layer')
         # ampl_graph.graph_comparison(output_files,'GWP_per_sector')
         # ampl_graph.graph_comparison(output_files,'Load_factor')
-        ampl_graph.graph_comparison(output_files,'Total_Res')
+        #ampl_graph.graph_comparison(output_files,'Total_Res')
+        ampl_graph.graph_comparison(output_files, 'Electricity_Demand')
+        ampl_graph.graph_comparison(output_files, 'Heat_High_T_Demand')
+        ampl_graph.graph_comparison(output_files, 'Heat_Low_T_SH_Demand')
+        ampl_graph.graph_comparison(output_files, 'Heat_Low_T_DHN_Demand')
+        ampl_graph.graph_comparison(output_files, 'Mobility_Passenger_Demand')
+        ampl_graph.graph_comparison(output_files, 'Mobility_Freight_Demand')
+        ampl_graph.graph_comparison(output_files, 'Non_Energy_Demand')
 
 
     ###############################################################################
