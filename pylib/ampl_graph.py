@@ -287,23 +287,35 @@ class AmplGraph:
         df_to_plot = df_to_plot[df_to_plot['Years'].isin(self.x_axis)]
 
         if plot:
-            fig = px.line(df_to_plot, x='Years', y='Total_Res', markers=True,
-                          title=self.case_study + ' - Total Primary Resource Demand [TWh]',
-                          labels={'Total_Res': 'Total Resources (TWh)', 'Years': 'Year'},
-                          line_shape='linear')
+            fig = px.line(
+                df_to_plot,
+                x='Years',
+                y='Total_Res',
+                markers=True,
+                title=self.case_study + ' - Total Primary Resource Demand [TWh]',
+                labels={'Total_Res': 'Total Resources (TWh)', 'Years': 'Year'},
+                line_shape='linear'
+            )
             fig.update_traces(line=dict(color='black'))
-            fig.update_xaxes(categoryorder='array', categoryarray=sorted(df_to_plot['Years'].unique()))
+            fig.update_xaxes(
+                categoryorder='array',
+                categoryarray=sorted(df_to_plot['Years'].unique())
+            )
 
             pio.show(fig)
 
-            # Sauvegarde des fichiers
+            # Sauvegarde en HTML
             if not os.path.exists(Path(self.outdir + "_Raw/")):
                 Path(self.outdir + "_Raw").mkdir(parents=True, exist_ok=True)
             fig.write_html(self.outdir + "_Raw/Total_Resources.html")
 
+            # Construire la liste des valeurs pour l'axe Y
+            min_val = df_to_plot['Total_Res'].min()
+            max_val = df_to_plot['Total_Res'].max()
+            yvals = sorted([0, int(round(min_val)), int(round(max_val))])
+
+            # Titre
             title = "<b>Total Primary Resource Demand</b><br>[TWh]"
-            yvals = sorted([0, int(min(round(df_to_plot['Total_Res']))),
-                            int(max(round(df_to_plot['Total_Res'])))])
 
             self.custom_fig(fig, title, yvals)
             fig.write_image(self.outdir + "Total_Resources.pdf", width=1200, height=550)
@@ -311,6 +323,288 @@ class AmplGraph:
             plt.close()
 
         return df_to_plot
+
+    def graph_heat_high_t_demand(self, ampl_collector=None, plot=True):
+        pio.renderers.default = 'browser'
+        if ampl_collector is None:
+            ampl_collector = self.ampl_collector
+        year_balance_full = ampl_collector['Year_balance'].copy()
+        year_balance_full.dropna(how='all', inplace=True)
+        res_tech = self.ampl_obj.sets['RESOURCES']
+        year_balance = year_balance_full.loc[
+            ~year_balance_full.index.get_level_values('Elements').isin(res_tech)
+        ]
+        year_balance_pos = year_balance[year_balance > 0]
+        total_prod = year_balance_pos.groupby(['Years']).sum()
+        if 'HEAT_HIGH_T' not in total_prod.columns:
+            print("Avertissement : 'HEAT_HIGH_T' n'apparaît pas dans year_balance.")
+            return pd.DataFrame()
+        heat_high_t_df = total_prod[['HEAT_HIGH_T']].copy()
+        heat_high_t_df.rename(columns={'HEAT_HIGH_T': 'HeatHighT_Res'}, inplace=True)
+        heat_high_t_df.reset_index(inplace=True)
+        heat_high_t_df['HeatHighT_Res'] /= 1000.0
+        heat_high_t_df['Years'] = heat_high_t_df['Years'].str.replace('YEAR_', '').astype(int)
+        heat_high_t_df = heat_high_t_df[heat_high_t_df['Years'].isin(self.x_axis)]
+        if plot:
+            fig = px.line(
+                heat_high_t_df,
+                x='Years',
+                y='HeatHighT_Res',
+                markers=True,
+                title=self.case_study + ' - HEAT_HIGH_T Demand [TWh]',
+                labels={'HeatHighT_Res': 'HEAT_HIGH_T (TWh)', 'Years': 'Year'},
+                line_shape='linear'
+            )
+            fig.update_traces(line=dict(color='black'))
+            fig.update_xaxes(categoryorder='array', categoryarray=sorted(heat_high_t_df['Years'].unique()))
+            pio.show(fig)
+            if not os.path.exists(Path(self.outdir + "_Raw/")):
+                Path(self.outdir + "_Raw").mkdir(parents=True, exist_ok=True)
+            fig.write_html(self.outdir + "_Raw/HEAT_HIGH_T_Resources.html")
+            min_val = heat_high_t_df['HeatHighT_Res'].min()
+            max_val = heat_high_t_df['HeatHighT_Res'].max()
+            yvals = sorted([0, int(round(min_val)), int(round(max_val))])
+            title = "<b>HEAT_HIGH_T Resource Demand</b><br>[TWh]"
+            self.custom_fig(fig, title, yvals)
+            fig.write_image(self.outdir + "HEAT_HIGH_T_Resources.pdf", width=1200, height=550)
+            plt.close()
+        return heat_high_t_df
+
+    def graph_heat_low_t_sh_demand(self, ampl_collector=None, plot=True):
+        pio.renderers.default = 'browser'
+        if ampl_collector is None:
+            ampl_collector = self.ampl_collector
+        year_balance_full = ampl_collector['Year_balance'].copy()
+        year_balance_full.dropna(how='all', inplace=True)
+        res_tech = self.ampl_obj.sets['RESOURCES']
+        year_balance = year_balance_full.loc[
+            ~year_balance_full.index.get_level_values('Elements').isin(res_tech)
+        ]
+        year_balance_pos = year_balance[year_balance > 0]
+        total_prod = year_balance_pos.groupby(['Years']).sum()
+        if 'HEAT_LOW_T_DECEN' not in total_prod.columns:
+            print("Avertissement : 'HEAT_LOW_T_DECEN' n'apparaît pas dans year_balance.")
+            return pd.DataFrame()
+        heat_low_t_sh_df = total_prod[['HEAT_LOW_T_DECEN']].copy()
+        heat_low_t_sh_df.rename(columns={'HEAT_LOW_T_DECEN': 'HeatLowT_SH_Res'}, inplace=True)
+        heat_low_t_sh_df.reset_index(inplace=True)
+        heat_low_t_sh_df['HeatLowT_SH_Res'] /= 1000.0
+        heat_low_t_sh_df['Years'] = heat_low_t_sh_df['Years'].str.replace('YEAR_', '').astype(int)
+        heat_low_t_sh_df = heat_low_t_sh_df[heat_low_t_sh_df['Years'].isin(self.x_axis)]
+        if plot:
+            fig = px.line(
+                heat_low_t_sh_df,
+                x='Years',
+                y='HeatLowT_SH_Res',
+                markers=True,
+                title=self.case_study + ' - HEAT_LOW_T_SH Demand [TWh]',
+                labels={'HeatLowT_SH_Res': 'HEAT_LOW_T_SH (TWh)', 'Years': 'Year'},
+                line_shape='linear'
+            )
+            fig.update_traces(line=dict(color='black'))
+            fig.update_xaxes(categoryorder='array', categoryarray=sorted(heat_low_t_sh_df['Years'].unique()))
+            pio.show(fig)
+            if not os.path.exists(Path(self.outdir + "_Raw/")):
+                Path(self.outdir + "_Raw").mkdir(parents=True, exist_ok=True)
+            fig.write_html(self.outdir + "_Raw/HEAT_LOW_T_SH_Resources.html")
+            min_val = heat_low_t_sh_df['HeatLowT_SH_Res'].min()
+            max_val = heat_low_t_sh_df['HeatLowT_SH_Res'].max()
+            yvals = sorted([0, int(round(min_val)), int(round(max_val))])
+            title = "<b>HEAT_LOW_T_SH Resource Demand</b><br>[TWh]"
+            self.custom_fig(fig, title, yvals)
+            fig.write_image(self.outdir + "HEAT_LOW_T_SH_Resources.pdf", width=1200, height=550)
+            plt.close()
+        return heat_low_t_sh_df
+
+    def graph_heat_low_t_dhn_demand(self, ampl_collector=None, plot=True):
+        pio.renderers.default = 'browser'
+        if ampl_collector is None:
+            ampl_collector = self.ampl_collector
+        year_balance_full = ampl_collector['Year_balance'].copy()
+        year_balance_full.dropna(how='all', inplace=True)
+        res_tech = self.ampl_obj.sets['RESOURCES']
+        year_balance = year_balance_full.loc[
+            ~year_balance_full.index.get_level_values('Elements').isin(res_tech)
+        ]
+        year_balance_pos = year_balance[year_balance > 0]
+        total_prod = year_balance_pos.groupby(['Years']).sum()
+        if 'HEAT_LOW_T_DHN' not in total_prod.columns:
+            print("Avertissement : 'HEAT_LOW_T_DHN' n'apparaît pas dans year_balance.")
+            return pd.DataFrame()
+        heat_low_t_dhn_df = total_prod[['HEAT_LOW_T_DHN']].copy()
+        heat_low_t_dhn_df.rename(columns={'HEAT_LOW_T_DHN': 'HeatLowT_DHN_Res'}, inplace=True)
+        heat_low_t_dhn_df.reset_index(inplace=True)
+        heat_low_t_dhn_df['HeatLowT_DHN_Res'] /= 1000.0
+        heat_low_t_dhn_df['Years'] = heat_low_t_dhn_df['Years'].str.replace('YEAR_', '').astype(int)
+        heat_low_t_dhn_df = heat_low_t_dhn_df[heat_low_t_dhn_df['Years'].isin(self.x_axis)]
+        if plot:
+            fig = px.line(
+                heat_low_t_dhn_df,
+                x='Years',
+                y='HeatLowT_DHN_Res',
+                markers=True,
+                title=self.case_study + ' - HEAT_LOW_T_DHN Demand [TWh]',
+                labels={'HeatLowT_DHN_Res': 'HEAT_LOW_T_DHN (TWh)', 'Years': 'Year'},
+                line_shape='linear'
+            )
+            fig.update_traces(line=dict(color='black'))
+            fig.update_xaxes(categoryorder='array', categoryarray=sorted(heat_low_t_dhn_df['Years'].unique()))
+            pio.show(fig)
+            if not os.path.exists(Path(self.outdir + "_Raw/")):
+                Path(self.outdir + "_Raw").mkdir(parents=True, exist_ok=True)
+            fig.write_html(self.outdir + "_Raw/HEAT_LOW_T_DHN_Resources.html")
+            min_val = heat_low_t_dhn_df['HeatLowT_DHN_Res'].min()
+            max_val = heat_low_t_dhn_df['HeatLowT_DHN_Res'].max()
+            yvals = sorted([0, int(round(min_val)), int(round(max_val))])
+            title = "<b>HEAT_LOW_T_DHN Resource Demand</b><br>[TWh]"
+            self.custom_fig(fig, title, yvals)
+            fig.write_image(self.outdir + "HEAT_LOW_T_DHN_Resources.pdf", width=1200, height=550)
+            plt.close()
+        return heat_low_t_dhn_df
+
+    def graph_mobility_passenger_demand(self, ampl_collector=None, plot=True):
+        pio.renderers.default = 'browser'
+        if ampl_collector is None:
+            ampl_collector = self.ampl_collector
+        year_balance_full = ampl_collector['Year_balance'].copy()
+        year_balance_full.dropna(how='all', inplace=True)
+        res_tech = self.ampl_obj.sets['RESOURCES']
+        year_balance = year_balance_full.loc[
+            ~year_balance_full.index.get_level_values('Elements').isin(res_tech)
+        ]
+        year_balance_pos = year_balance[year_balance > 0]
+        total_prod = year_balance_pos.groupby(['Years']).sum()
+        if 'MOB_PRIVATE' not in total_prod.columns or 'MOB_PUBLIC' not in total_prod.columns:
+            print("Avertissement : 'MOB_PRIVATE' ou 'MOB_PUBLIC' n'apparaît pas dans year_balance.")
+            return pd.DataFrame()
+        mobility_passenger_df = total_prod[['MOB_PRIVATE', 'MOB_PUBLIC']].copy()
+        mobility_passenger_df['Mobility_Passenger_Res'] = mobility_passenger_df['MOB_PRIVATE'] + mobility_passenger_df[
+            'MOB_PUBLIC']
+        mobility_passenger_df.drop(columns=['MOB_PRIVATE', 'MOB_PUBLIC'], inplace=True)
+        mobility_passenger_df.reset_index(inplace=True)
+        mobility_passenger_df['Mobility_Passenger_Res'] /= 1000.0
+        mobility_passenger_df['Years'] = mobility_passenger_df['Years'].str.replace('YEAR_', '').astype(int)
+        mobility_passenger_df = mobility_passenger_df[mobility_passenger_df['Years'].isin(self.x_axis)]
+        if plot:
+            fig = px.line(
+                mobility_passenger_df,
+                x='Years',
+                y='Mobility_Passenger_Res',
+                markers=True,
+                title=self.case_study + ' - Mobility Passenger Demand [TWh]',
+                labels={'Mobility_Passenger_Res': 'Mobility Passenger (TWh)', 'Years': 'Year'},
+                line_shape='linear'
+            )
+            fig.update_traces(line=dict(color='black'))
+            fig.update_xaxes(categoryorder='array', categoryarray=sorted(mobility_passenger_df['Years'].unique()))
+            pio.show(fig)
+            if not os.path.exists(Path(self.outdir + "_Raw/")):
+                Path(self.outdir + "_Raw").mkdir(parents=True, exist_ok=True)
+            fig.write_html(self.outdir + "_Raw/Mobility_Passenger_Resources.html")
+            min_val = mobility_passenger_df['Mobility_Passenger_Res'].min()
+            max_val = mobility_passenger_df['Mobility_Passenger_Res'].max()
+            yvals = sorted([0, int(round(min_val)), int(round(max_val))])
+            title = "<b>Mobility Passenger Resource Demand</b><br>[TWh]"
+            self.custom_fig(fig, title, yvals)
+            fig.write_image(self.outdir + "Mobility_Passenger_Resources.pdf", width=1200, height=550)
+            plt.close()
+        return mobility_passenger_df
+
+    def graph_mobility_freight_demand(self, ampl_collector=None, plot=True):
+        pio.renderers.default = 'browser'
+        if ampl_collector is None:
+            ampl_collector = self.ampl_collector
+        year_balance_full = ampl_collector['Year_balance'].copy()
+        year_balance_full.dropna(how='all', inplace=True)
+        res_tech = self.ampl_obj.sets['RESOURCES']
+        year_balance = year_balance_full.loc[
+            ~year_balance_full.index.get_level_values('Elements').isin(res_tech)
+        ]
+        year_balance_pos = year_balance[year_balance > 0]
+        total_prod = year_balance_pos.groupby(['Years']).sum()
+        required_columns = ['MOB_FREIGHT_BOAT', 'MOB_FREIGHT_RAIL', 'MOB_FREIGHT_ROAD']
+        if not all(col in total_prod.columns for col in required_columns):
+            print("Avertissement : Certaines colonnes de mobilité fret n'apparaissent pas dans year_balance.")
+            return pd.DataFrame()
+        mobility_freight_df = total_prod[required_columns].copy()
+        mobility_freight_df['Mobility_Freight_Res'] = mobility_freight_df.sum(axis=1)
+        mobility_freight_df.drop(columns=required_columns, inplace=True)
+        mobility_freight_df.reset_index(inplace=True)
+        mobility_freight_df['Mobility_Freight_Res'] /= 1000.0
+        mobility_freight_df['Years'] = mobility_freight_df['Years'].str.replace('YEAR_', '').astype(int)
+        mobility_freight_df = mobility_freight_df[mobility_freight_df['Years'].isin(self.x_axis)]
+        if plot:
+            fig = px.line(
+                mobility_freight_df,
+                x='Years',
+                y='Mobility_Freight_Res',
+                markers=True,
+                title=self.case_study + ' - Mobility Freight Demand [TWh]',
+                labels={'Mobility_Freight_Res': 'Mobility Freight (TWh)', 'Years': 'Year'},
+                line_shape='linear'
+            )
+            fig.update_traces(line=dict(color='black'))
+            fig.update_xaxes(categoryorder='array', categoryarray=sorted(mobility_freight_df['Years'].unique()))
+            pio.show(fig)
+            if not os.path.exists(Path(self.outdir + "_Raw/")):
+                Path(self.outdir + "_Raw").mkdir(parents=True, exist_ok=True)
+            fig.write_html(self.outdir + "_Raw/Mobility_Freight_Resources.html")
+            min_val = mobility_freight_df['Mobility_Freight_Res'].min()
+            max_val = mobility_freight_df['Mobility_Freight_Res'].max()
+            yvals = sorted([0, int(round(min_val)), int(round(max_val))])
+            title = "<b>Mobility Freight Resource Demand</b><br>[TWh]"
+            self.custom_fig(fig, title, yvals)
+            fig.write_image(self.outdir + "Mobility_Freight_Resources.pdf", width=1200, height=550)
+            plt.close()
+        return mobility_freight_df
+
+    def graph_non_energy_demand(self, ampl_collector=None, plot=True):
+        pio.renderers.default = 'browser'
+        if ampl_collector is None:
+            ampl_collector = self.ampl_collector
+        year_balance_full = ampl_collector['Year_balance'].copy()
+        year_balance_full.dropna(how='all', inplace=True)
+        res_tech = self.ampl_obj.sets['RESOURCES']
+        year_balance = year_balance_full.loc[
+            ~year_balance_full.index.get_level_values('Elements').isin(res_tech)
+        ]
+        year_balance_pos = year_balance[year_balance > 0]
+        total_prod = year_balance_pos.groupby(['Years']).sum()
+        required_columns = ['AMMONIA', 'METHANOL', 'HVC']
+        if not all(col in total_prod.columns for col in required_columns):
+            print("Avertissement : Certaines colonnes de NON-ENERGY n'apparaissent pas dans year_balance.")
+            return pd.DataFrame()
+        non_energy_df = total_prod[required_columns].copy()
+        non_energy_df['Non_Energy_Res'] = non_energy_df.sum(axis=1)
+        non_energy_df.drop(columns=required_columns, inplace=True)
+        non_energy_df.reset_index(inplace=True)
+        non_energy_df['Non_Energy_Res'] /= 1000.0
+        non_energy_df['Years'] = non_energy_df['Years'].str.replace('YEAR_', '').astype(int)
+        non_energy_df = non_energy_df[non_energy_df['Years'].isin(self.x_axis)]
+        if plot:
+            fig = px.line(
+                non_energy_df,
+                x='Years',
+                y='Non_Energy_Res',
+                markers=True,
+                title=self.case_study + ' - Non-Energy Demand [TWh]',
+                labels={'Non_Energy_Res': 'Non-Energy (TWh)', 'Years': 'Year'},
+                line_shape='linear'
+            )
+            fig.update_traces(line=dict(color='black'))
+            fig.update_xaxes(categoryorder='array', categoryarray=sorted(non_energy_df['Years'].unique()))
+            pio.show(fig)
+            if not os.path.exists(Path(self.outdir + "_Raw/")):
+                Path(self.outdir + "_Raw").mkdir(parents=True, exist_ok=True)
+            fig.write_html(self.outdir + "_Raw/Non_Energy_Resources.html")
+            min_val = non_energy_df['Non_Energy_Res'].min()
+            max_val = non_energy_df['Non_Energy_Res'].max()
+            yvals = sorted([0, int(round(min_val)), int(round(max_val))])
+            title = "<b>Non-Energy Resource Demand</b><br>[TWh]"
+            self.custom_fig(fig, title, yvals)
+            fig.write_image(self.outdir + "Non_Energy_Resources.pdf", width=1200, height=550)
+            plt.close()
+        return non_energy_df
 
     '''
     Graph_gwp_per_sector to plot the GWP attributed to the different sectors
