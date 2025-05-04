@@ -43,13 +43,13 @@ CO2_neutrality_2050_val = 3406.92  # Value equivalent to CO2-neutrality in 2050
 # [ktCO2,eq]
 
 run_opti = False  # True to run optimisation
-graph = False # True to plot graphs for deterministic run
-graph_comp = True  # True to plot comparative graphs between two deterministic
+graph = True # True to plot graphs for deterministic run
+graph_comp = False  # True to plot comparative graphs between two deterministic
 # runs
 
-case_study = 'scenario_clever'  # Give here the name of the case study for
+case_study = 'for_comp_scenario_clever_with_new_GWP'  # Give here the name of the case study for
 # deterministic run
-expl_text = 'clever'  # Give here explanation text to describe the
+expl_text = 'for_comp_scenario_clever_with_new_GWP'  # Give here explanation text to describe the
 # case study
 
 # %% Join the .dat and .mod files depending on the type of model (MO or TD).
@@ -202,13 +202,14 @@ if __name__ == '__main__':
         # ampl_graph.graph_cost_op_phase() # Cumulative operational costs
         # ampl_graph.graph_cost_return() # Salvage value
         #ampl_graph.graph_total_primary_demand()
-        ampl_graph.graph_electricity_demand()
-        ampl_graph.graph_heat_high_t_demand()
-        ampl_graph.graph_heat_low_t_sh_demand()
-        ampl_graph.graph_heat_low_t_dhn_demand()
-        ampl_graph.graph_mobility_passenger_demand()
-        ampl_graph.graph_mobility_freight_demand()
-        ampl_graph.graph_non_energy_demand()
+        #ampl_graph.graph_electricity_demand()
+        #ampl_graph.graph_heat_high_t_demand()
+        #ampl_graph.graph_heat_low_t_sh_demand()
+        #ampl_graph.graph_heat_low_t_dhn_demand()
+        #ampl_graph.graph_mobility_passenger_demand()
+        #ampl_graph.graph_mobility_freight_demand()
+        #ampl_graph.graph_non_energy_demand()
+        ampl_graph.graph_total_trans_cost()
 
         #ampl_graph.graph_layer() # Prod-Cons graph per layer
         #ampl_graph.graph_tech_cap() # Installed capapcities per sector
