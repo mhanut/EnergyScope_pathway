@@ -43,13 +43,13 @@ CO2_neutrality_2050_val = 3406.92  # Value equivalent to CO2-neutrality in 2050
 # [ktCO2,eq]
 
 run_opti = False  # True to run optimisation
-graph = True # True to plot graphs for deterministic run
-graph_comp = False  # True to plot comparative graphs between two deterministic
+graph = False # True to plot graphs for deterministic run
+graph_comp = True  # True to plot comparative graphs between two deterministic
 # runs
 
-case_study = 'for_comp_scenario_clever_with_new_GWP'  # Give here the name of the case study for
+case_study = 'scenario_noreduction_with_new_GWP'  # Give here the name of the case study for
 # deterministic run
-expl_text = 'for_comp_scenario_clever_with_new_GWP'  # Give here explanation text to describe the
+expl_text = 'scenario_noreduction_with_new_GWP'  # Give here explanation text to describe the
 # case study
 
 # %% Join the .dat and .mod files depending on the type of model (MO or TD).
@@ -209,7 +209,7 @@ if __name__ == '__main__':
         #ampl_graph.graph_mobility_passenger_demand()
         #ampl_graph.graph_mobility_freight_demand()
         #ampl_graph.graph_non_energy_demand()
-        ampl_graph.graph_total_trans_cost()
+
 
         #ampl_graph.graph_layer() # Prod-Cons graph per layer
         #ampl_graph.graph_tech_cap() # Installed capapcities per sector
@@ -221,14 +221,14 @@ if __name__ == '__main__':
     # case_study_1: the reference case study
     # Graphs present the absolute difference: case_study - case_study_1
     if graph_comp:
-        case_study = 'scenario_clever'
+        case_study = 'for_comp_scenario_clever_with_new_GWP'
         output_file = pth_output_all + '/' + case_study + '/_Results.pkl'
         ampl_graph = AmplGraph(output_file, ampl_0, case_study)
         output_folder_2 = os.path.join(pth_output_all, case_study)
         output_file_2 = os.path.join(output_folder_2, '_Results.pkl')
 
         # Reference case: TD-Perfect foresight
-        case_study_1 = 'scenario_no_reduction'
+        case_study_1 = 'scenario_noreduction_with_new_GWP'
         output_folder_1 = os.path.join(pth_output_all, case_study_1)
         output_file_1 = os.path.join(output_folder_1, '_Results.pkl')
 
@@ -239,7 +239,7 @@ if __name__ == '__main__':
         #ampl_graph.graph_comparison(output_files,'Resources')
         # ampl_graph.graph_comparison(output_files,'Cost_return')
         #ampl_graph.graph_comparison(output_files,'Total_trans_cost')
-        # ampl_graph.graph_comparison(output_files,'Total_system_cost')
+        ampl_graph.graph_comparison(output_files,'Total_system_cost')
         # ampl_graph.graph_comparison(output_files,'Tech_cap')
         # ampl_graph.graph_comparison(output_files,'Layer')
         # ampl_graph.graph_comparison(output_files,'GWP_per_sector')
